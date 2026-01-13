@@ -9,7 +9,7 @@
     "dev:shopify": "shopify app dev",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "shopify": "shopify",
-    "start": "node server.js",
+    "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
     "generate": "prisma generate",
     "db:push": "prisma db push",
