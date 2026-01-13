@@ -1,0 +1,12 @@
+# .htaccess for Hostinger Node.js App
+# This file helps route requests to the Node.js application
+
+RewriteEngine On
+
+# If the request is for a file or directory that exists, serve it
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Otherwise, proxy to the Node.js app
+# Note: Hostinger Node.js App handles routing automatically
+# This file may not be needed if Hostinger uses Node.js directly
