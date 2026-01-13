@@ -14,7 +14,10 @@
     "generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "setup": "prisma generate && prisma db push"
+    "setup": "prisma generate && prisma db push",
+    "postinstall": "prisma generate",
+    "deploy": "npm run build && npm run generate",
+    "build:hostinger": "npm run generate && npm run build && echo 'Build completed successfully'"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
