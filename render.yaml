@@ -1,0 +1,28 @@
+# Render.com deployment configuration
+# Deploy using the Render dashboard or CLI
+
+services:
+  - type: web
+    name: shopify-pos-sync
+    runtime: node
+    region: ohio
+    plan: starter
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npx prisma db push && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./data/dev.db
+      - key: SHOPIFY_API_KEY
+        sync: false
+      - key: SHOPIFY_API_SECRET
+        sync: false
+      - key: SCOPES
+        value: read_products,write_products,read_product_listings,write_product_listings,read_inventory,write_inventory
+      - key: HOST
+        sync: false
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 1

@@ -1,0 +1,13 @@
+# Railway deployment configuration
+[build]
+builder = "nixpacks"
+buildCommand = "npm ci && npx prisma generate && npm run build"
+
+[deploy]
+startCommand = "npx prisma db push && npm run start"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+
+[variables]
+NODE_ENV = "production"
+PORT = "3000"
