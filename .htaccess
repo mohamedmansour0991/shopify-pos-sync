@@ -1,19 +1,27 @@
 # Enable Rewrite Engine
 RewriteEngine On
 
-# Enable proxy module (required for reverse proxy)
+# Method 1: Try using mod_proxy (if enabled)
 <IfModule mod_proxy.c>
     ProxyPreserveHost On
     ProxyRequests Off
-    ProxyPassInterpolateEnv On
+    
+    # Proxy all requests to Node.js server (PM2)
+    # Only proxy if file/directory doesn't exist
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !^/build/
+    RewriteCond %{REQUEST_URI} !^/index.php
+    RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
 </IfModule>
 
-# Proxy all requests to Node.js server (PM2)
-# Only proxy if file/directory doesn't exist
+# Method 2: Fallback to PHP proxy (if mod_proxy doesn't work)
+# If the file doesn't exist and it's not a static file, route to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/build/
-RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+RewriteCond %{REQUEST_URI} !^/index.php
+RewriteRule ^(.*)$ index.php [L]
 
 # Serve static files directly (from build/client)
 RewriteCond %{REQUEST_FILENAME} -f
