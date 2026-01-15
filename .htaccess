@@ -12,6 +12,8 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/build/
 RewriteCond %{REQUEST_URI} !^/index.php
 RewriteCond %{REQUEST_URI} !^/test-proxy.php
+RewriteCond %{REQUEST_URI} !^/test-index.php
+RewriteCond %{REQUEST_URI} !^/debug.php
 RewriteRule ^(.*)$ index.php [L,QSA]
 
 # Security Headers

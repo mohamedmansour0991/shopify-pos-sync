@@ -4,10 +4,12 @@
  * This file proxies all requests to the Node.js server running on port 3000
  */
 
-// Disable output buffering
+// Disable all output buffering and error display
 while (ob_get_level()) {
     ob_end_clean();
 }
+ini_set('display_errors', 0);
+error_reporting(0);
 
 // Get the request URI and method
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -26,12 +28,21 @@ if (!empty($_SERVER['QUERY_STRING'])) {
 
 // Initialize cURL
 $ch = curl_init();
+if ($ch === false) {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    echo "Internal Server Error: Failed to initialize cURL";
+    exit;
+}
+
 curl_setopt($ch, CURLOPT_URL, $targetUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HEADER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
 // Set request method
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestMethod);
@@ -60,23 +71,17 @@ if (isset($_SERVER['HTTP_HOST'])) {
 
 // Forward request body for POST/PUT/PATCH/DELETE
 if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-    // Get Content-Type
-    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-    
     // Read raw body
     $body = file_get_contents('php://input');
     
     if (!empty($body)) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
     }
-    
-    // Ensure Content-Type is set if body exists
-    if (!empty($body) && empty($contentType)) {
-        $headers[] = "Content-Type: application/octet-stream";
-    }
 }
 
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+if (!empty($headers)) {
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+}
 
 // Execute request
 $response = curl_exec($ch);
@@ -84,6 +89,7 @@ $response = curl_exec($ch);
 // Get HTTP status code and errors
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $error = curl_error($ch);
+$errno = curl_errno($ch);
 $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 curl_close($ch);
 
@@ -93,7 +99,7 @@ if ($error || $response === false) {
     header('Content-Type: text/plain');
     echo "Bad Gateway: Could not connect to Node.js server.\n";
     if ($error) {
-        echo "Error: $error\n";
+        echo "Error: $error (Code: $errno)\n";
     } else {
         echo "Error: cURL request failed\n";
     }
@@ -138,4 +144,5 @@ http_response_code($httpCode);
 
 // Output response body
 echo $responseBody;
+exit;
 ?>
