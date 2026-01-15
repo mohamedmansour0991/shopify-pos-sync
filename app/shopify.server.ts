@@ -14,27 +14,51 @@ import { dirname, join } from "path";
 try {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  // Go up from app/ to project root
-  const envPath = join(__dirname, "..", ".env");
+  // Go up from app/ to project root (or from build/server/app/ to project root)
+  // Try multiple possible paths - in build, files are in build/server/app/
+  const possiblePaths = [
+    join(process.cwd(), ".env"), // from project root (most reliable)
+    join(__dirname, "..", "..", "..", ".env"), // from build/server/app/ to root
+    join(__dirname, "..", "..", ".env"), // from build/server/app/ (if structure differs)
+    join(__dirname, "..", ".env"), // from app/ (development)
+  ];
   
-  const envFile = readFileSync(envPath, "utf-8");
-  const envLines = envFile.split("\n");
+  let envPath: string | null = null;
+  for (const path of possiblePaths) {
+    try {
+      // Check if file exists and is readable
+      const stats = readFileSync(path, "utf-8");
+      envPath = path;
+      break;
+    } catch {
+      // Try next path
+      continue;
+    }
+  }
   
-  for (const line of envLines) {
-    const trimmedLine = line.trim();
-    if (trimmedLine && !trimmedLine.startsWith("#")) {
-      const [key, ...valueParts] = trimmedLine.split("=");
-      if (key && valueParts.length > 0) {
-        const value = valueParts.join("=").trim().replace(/^["']|["']$/g, "");
-        if (!process.env[key.trim()]) {
-          process.env[key.trim()] = value;
+  if (envPath) {
+    const envFile = readFileSync(envPath, "utf-8");
+    const envLines = envFile.split("\n");
+    
+    for (const line of envLines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine && !trimmedLine.startsWith("#")) {
+        const [key, ...valueParts] = trimmedLine.split("=");
+        if (key && valueParts.length > 0) {
+          const value = valueParts.join("=").trim().replace(/^["']|["']$/g, "");
+          if (!process.env[key.trim()]) {
+            process.env[key.trim()] = value;
+          }
         }
       }
     }
+    console.log(`✅ Loaded .env from: ${envPath}`);
+  } else {
+    console.log("⚠️  .env file not found in any expected location");
   }
 } catch (error) {
   // .env file not found or couldn't be read - that's okay if vars are set in environment
-  // Silently continue
+  console.log("ℹ️  Could not load .env file, using environment variables");
 }
 
 // Validate required environment variables
