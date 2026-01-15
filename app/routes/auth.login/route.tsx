@@ -17,7 +17,14 @@ import { login } from "../../shopify.server";
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const errors = login(request);
+  // For GET/HEAD requests, just return empty errors - don't call login()
+  // login() tries to parse FormData which causes errors for GET requests
+  if (request.method === "GET" || request.method === "HEAD") {
+    return json({ errors: null, polarisTranslations: {} });
+  }
+  
+  // For POST requests, login() should handle FormData correctly
+  const errors = await login(request);
   return json({ errors, polarisTranslations: {} });
 };
 
