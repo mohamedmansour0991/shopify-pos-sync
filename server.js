@@ -1,16 +1,10 @@
 // Production server for Hostinger
-import { createRequestHandler } from "@remix-run/node";
-import * as build from "./build/server/index.js";
-import { installGlobals } from "@remix-run/node";
-import http from "http";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
-// Install globals for Node.js (Request, Response, etc.)
-installGlobals();
-
-// Load .env file manually (PM2 doesn't load it automatically)
+// Load .env file FIRST, before importing anything else
+// This is critical because shopify.server.ts validates env vars on module load
 try {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
@@ -37,6 +31,15 @@ try {
   // .env file not found or couldn't be read - that's okay if vars are set in environment
   console.log("ℹ️  .env file not found, using environment variables");
 }
+
+// NOW import Remix and build (after .env is loaded)
+import { createRequestHandler } from "@remix-run/node";
+import * as build from "./build/server/index.js";
+import { installGlobals } from "@remix-run/node";
+import http from "http";
+
+// Install globals for Node.js (Request, Response, etc.)
+installGlobals();
 
 // Get port from environment (cPanel sets this automatically)
 const port = process.env.PORT || process.env.NODE_PORT || 3000;

@@ -6,6 +6,36 @@ import {
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+// Load .env file if not already loaded (for PM2 compatibility)
+try {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  // Go up from app/ to project root
+  const envPath = join(__dirname, "..", ".env");
+  
+  const envFile = readFileSync(envPath, "utf-8");
+  const envLines = envFile.split("\n");
+  
+  for (const line of envLines) {
+    const trimmedLine = line.trim();
+    if (trimmedLine && !trimmedLine.startsWith("#")) {
+      const [key, ...valueParts] = trimmedLine.split("=");
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join("=").trim().replace(/^["']|["']$/g, "");
+        if (!process.env[key.trim()]) {
+          process.env[key.trim()] = value;
+        }
+      }
+    }
+  }
+} catch (error) {
+  // .env file not found or couldn't be read - that's okay if vars are set in environment
+  // Silently continue
+}
 
 // Validate required environment variables
 function validateEnvironmentVariables(): void {
