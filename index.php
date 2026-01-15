@@ -4,11 +4,6 @@
  * This file proxies all requests to the Node.js server running on port 3000
  */
 
-// Enable error reporting for debugging (remove in production)
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-
 // Disable output buffering
 while (ob_get_level()) {
     ob_end_clean();
@@ -43,20 +38,45 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestMethod);
 
 // Forward headers
 $headers = [];
-foreach (getallheaders() as $name => $value) {
-    // Skip some headers that shouldn't be forwarded
-    $lowerName = strtolower($name);
-    if (!in_array($lowerName, ['host', 'connection', 'content-length'])) {
-        $headers[] = "$name: $value";
+$allHeaders = getallheaders();
+if ($allHeaders) {
+    foreach ($allHeaders as $name => $value) {
+        // Skip some headers that shouldn't be forwarded
+        $lowerName = strtolower($name);
+        if (!in_array($lowerName, ['host', 'connection', 'content-length', 'transfer-encoding'])) {
+            $headers[] = "$name: $value";
+        }
     }
 }
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-// Forward request body for POST/PUT/PATCH
-if (in_array($requestMethod, ['POST', 'PUT', 'PATCH'])) {
-    $body = file_get_contents('php://input');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+// Add X-Forwarded-Proto for HTTPS
+if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
+    $headers[] = "X-Forwarded-Proto: https";
 }
+// Add X-Forwarded-Host
+if (isset($_SERVER['HTTP_HOST'])) {
+    $headers[] = "X-Forwarded-Host: " . $_SERVER['HTTP_HOST'];
+}
+
+// Forward request body for POST/PUT/PATCH/DELETE
+if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+    // Get Content-Type
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    
+    // Read raw body
+    $body = file_get_contents('php://input');
+    
+    if (!empty($body)) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+    }
+    
+    // Ensure Content-Type is set if body exists
+    if (!empty($body) && empty($contentType)) {
+        $headers[] = "Content-Type: application/octet-stream";
+    }
+}
+
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 // Execute request
 $response = curl_exec($ch);
@@ -96,6 +116,7 @@ $responseBody = substr($response, $headerSize);
 // Parse and forward response headers
 $headerLines = explode("\r\n", $responseHeaders);
 foreach ($headerLines as $headerLine) {
+    $headerLine = trim($headerLine);
     if (empty($headerLine) || strpos($headerLine, 'HTTP/') === 0) {
         continue;
     }
@@ -105,8 +126,8 @@ foreach ($headerLines as $headerLine) {
         $value = trim($headerParts[1]);
         $lowerName = strtolower($name);
         
-        // Skip some headers
-        if (!in_array($lowerName, ['transfer-encoding', 'connection', 'content-encoding', 'content-length'])) {
+        // Skip some headers that PHP handles automatically
+        if (!in_array($lowerName, ['transfer-encoding', 'connection', 'content-encoding', 'content-length', 'server'])) {
             header("$name: $value", false);
         }
     }

@@ -50,8 +50,10 @@ const requestHandler = createRequestHandler(build, "production");
 const server = http.createServer(async (req, res) => {
   try {
     // Build the full URL
-    const protocol = req.headers["x-forwarded-proto"] || "http";
-    const hostname = req.headers.host || host;
+    // Check for X-Forwarded-Proto (from PHP proxy or load balancer)
+    const protocol = req.headers["x-forwarded-proto"] || 
+                     (req.headers["x-forwarded-ssl"] === "on" ? "https" : "http");
+    const hostname = req.headers["x-forwarded-host"] || req.headers.host || host;
     const url = `${protocol}://${hostname}${req.url || "/"}`;
     
     // Create a Request object
@@ -60,13 +62,15 @@ const server = http.createServer(async (req, res) => {
       headers: new Headers(req.headers),
     };
 
-    // Add body for POST/PUT/PATCH requests
+    // Add body for POST/PUT/PATCH/DELETE requests
     if (req.method !== "GET" && req.method !== "HEAD") {
       const chunks = [];
       for await (const chunk of req) {
         chunks.push(chunk);
       }
-      requestInit.body = Buffer.concat(chunks);
+      if (chunks.length > 0) {
+        requestInit.body = Buffer.concat(chunks);
+      }
     }
 
     const request = new Request(url, requestInit);
