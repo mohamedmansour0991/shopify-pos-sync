@@ -50,16 +50,25 @@ curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestMethod);
 
 // Forward headers
+// getallheaders() may not be available in CGI mode, so use $_SERVER
 $headers = [];
-$allHeaders = getallheaders();
-if ($allHeaders) {
-    foreach ($allHeaders as $name => $value) {
+foreach ($_SERVER as $key => $value) {
+    // Convert SERVER keys to HTTP headers (e.g., HTTP_ACCEPT -> Accept)
+    if (strpos($key, 'HTTP_') === 0) {
+        $headerName = str_replace('_', '-', substr($key, 5));
+        $lowerName = strtolower($headerName);
         // Skip some headers that shouldn't be forwarded
-        $lowerName = strtolower($name);
         if (!in_array($lowerName, ['host', 'connection', 'content-length', 'transfer-encoding'])) {
-            $headers[] = "$name: $value";
+            $headers[] = "$headerName: $value";
         }
     }
+}
+// Also handle Content-Type and Content-Length from $_SERVER
+if (isset($_SERVER['CONTENT_TYPE'])) {
+    $headers[] = "Content-Type: " . $_SERVER['CONTENT_TYPE'];
+}
+if (isset($_SERVER['CONTENT_LENGTH'])) {
+    $headers[] = "Content-Length: " . $_SERVER['CONTENT_LENGTH'];
 }
 // Add X-Forwarded-Proto for HTTPS
 if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
@@ -78,6 +87,10 @@ if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
     
     if (!empty($body)) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        // Ensure Content-Length is set if not already in headers
+        if (!isset($_SERVER['CONTENT_LENGTH'])) {
+            $headers[] = "Content-Length: " . strlen($body);
+        }
     }
 }
 
