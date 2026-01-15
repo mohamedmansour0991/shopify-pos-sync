@@ -20,6 +20,11 @@ $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 // Remove query string from URI for building target URL
 $uriWithoutQuery = parse_url($requestUri, PHP_URL_PATH) ?: '/';
 
+// Normalize URI: convert /index.php to / (Remix doesn't have a route for /index.php)
+if ($uriWithoutQuery === '/index.php' || $uriWithoutQuery === '/index.php/') {
+    $uriWithoutQuery = '/';
+}
+
 // Build the target URL
 $targetUrl = 'http://127.0.0.1:3000' . $uriWithoutQuery;
 
