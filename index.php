@@ -43,6 +43,8 @@ curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+// Handle chunked encoding properly
+curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
 // Set request method
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestMethod);
@@ -121,6 +123,7 @@ $responseBody = substr($response, $headerSize);
 
 // Parse and forward response headers
 $headerLines = explode("\r\n", $responseHeaders);
+$isChunked = false;
 foreach ($headerLines as $headerLine) {
     $headerLine = trim($headerLine);
     if (empty($headerLine) || strpos($headerLine, 'HTTP/') === 0) {
@@ -132,6 +135,12 @@ foreach ($headerLines as $headerLine) {
         $value = trim($headerParts[1]);
         $lowerName = strtolower($name);
         
+        // Check for chunked encoding
+        if ($lowerName === 'transfer-encoding' && strtolower($value) === 'chunked') {
+            $isChunked = true;
+            continue; // Skip this header, PHP will handle it
+        }
+        
         // Skip some headers that PHP handles automatically
         if (!in_array($lowerName, ['transfer-encoding', 'connection', 'content-encoding', 'content-length', 'server'])) {
             header("$name: $value", false);
@@ -139,10 +148,11 @@ foreach ($headerLines as $headerLine) {
     }
 }
 
-// Set response status
+// Set response status BEFORE outputting body
 http_response_code($httpCode);
 
 // Output response body
+// If chunked, the body should already be decoded by curl
 echo $responseBody;
 exit;
 ?>
