@@ -4,12 +4,14 @@
  * This file proxies all requests to the Node.js server running on port 3000
  */
 
-// Disable all output buffering and error display
+// Disable all output buffering
 while (ob_get_level()) {
     ob_end_clean();
 }
-ini_set('display_errors', 0);
-error_reporting(0);
+// Enable error reporting for debugging (disable in production)
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('log_errors', 1);
 
 // Get the request URI and method
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -126,6 +128,8 @@ if ($error || $response === false) {
         echo "Error: cURL request failed\n";
     }
     echo "Target URL: $targetUrl\n";
+    echo "Request Method: $requestMethod\n";
+    error_log("PHP Proxy Error: $error (Code: $errno) - URL: $targetUrl");
     exit;
 }
 
@@ -134,6 +138,9 @@ if (empty($response)) {
     http_response_code(502);
     header('Content-Type: text/plain');
     echo "Bad Gateway: Empty response from Node.js server.\n";
+    echo "Target URL: $targetUrl\n";
+    echo "HTTP Code: $httpCode\n";
+    error_log("PHP Proxy Error: Empty response from Node.js - URL: $targetUrl, HTTP Code: $httpCode");
     exit;
 }
 
