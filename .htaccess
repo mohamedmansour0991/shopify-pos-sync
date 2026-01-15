@@ -1,12 +1,26 @@
-# .htaccess for Hostinger Node.js App
-# This file helps route requests to the Node.js application
-
+# Enable Rewrite Engine
 RewriteEngine On
 
-# If the request is for a file or directory that exists, serve it
+# Proxy all requests to Node.js server (if using reverse proxy)
+# Uncomment these lines if you have Node.js running on a different port
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+
+# For cPanel Node.js apps, the server should handle all routes
+# This ensures static files are served correctly
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Otherwise, proxy to the Node.js app
-# Note: Hostinger Node.js App handles routing automatically
-# This file may not be needed if Hostinger uses Node.js directly
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Set charset
+AddDefaultCharset UTF-8

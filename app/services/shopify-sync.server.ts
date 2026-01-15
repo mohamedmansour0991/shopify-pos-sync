@@ -674,9 +674,8 @@ async function addProductToCollection(
       }
     }`,
     {
-        id: collectionId,
-        productIds: [productId],
-      },
+      id: collectionId,
+      productIds: [productId],
     }
   );
   

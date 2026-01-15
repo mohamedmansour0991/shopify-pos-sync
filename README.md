@@ -1,23 +1,26 @@
 # POS Sync - Shopify App
 
-A Shopify app that synchronizes products and categories from your POS (Point of Sale) system to your Shopify store automatically.
+A Shopify app that synchronizes products and categories from your POS (Point of Sale) system to your Shopify store automatically. This app is designed to work with TheOneAPIPOS system and supports encrypted API responses.
 
 ## Features
 
-- **Automatic Sync**: Schedule automatic synchronization hourly, daily, or at custom intervals
+- **Automatic Sync**: Schedule automatic synchronization hourly, every 6 hours, every 12 hours, or daily
 - **Manual Sync**: Trigger manual sync anytime from the app dashboard
-- **Category to Collection**: POS categories are synced as Shopify collections
-- **Product Sync**: Products are synced with titles, descriptions, prices, SKUs, and images
+- **Category to Collection**: POS categories are synced as Shopify collections (supports main categories and subcategories)
+- **Product Sync**: Products are synced with titles (English/Arabic), descriptions, prices, SKUs, barcodes, and images
 - **Encrypted API Support**: Supports AES-256-CBC encrypted API responses from your POS system
-- **Sync Logs**: Track all synchronization history with detailed logs
+- **Rate Limiting**: Built-in rate limiting for Shopify GraphQL API to prevent hitting rate limits
+- **Sync Logs**: Track all synchronization history with detailed logs and error reporting
+- **Multi-Store Support**: Supports multiple Shopify stores with independent configurations
 
 ## Tech Stack
 
 - **Framework**: [Remix](https://remix.run/) with [Shopify App Remix](https://shopify.dev/docs/apps/tools/cli/getting-started)
-- **Database**: SQLite with [Prisma ORM](https://www.prisma.io/)
+- **Database**: SQLite with [Prisma ORM](https://www.prisma.io/) (Note: Consider PostgreSQL for production with high traffic)
 - **UI**: [Shopify Polaris](https://polaris.shopify.com/)
-- **Scheduling**: [node-cron](https://github.com/node-cron/node-cron)
-- **Encryption**: [crypto-js](https://github.com/brix/crypto-js) for AES decryption
+- **Scheduling**: [node-cron](https://github.com/node-cron/node-cron) for automatic synchronization
+- **Encryption**: [crypto-js](https://github.com/brix/crypto-js) for AES-256-CBC decryption
+- **Rate Limiting**: Custom token bucket implementation for Shopify GraphQL API
 
 ## Getting Started
 
@@ -53,7 +56,11 @@ A Shopify app that synchronizes products and categories from your POS (Point of 
    SCOPES=read_products,write_products,read_product_listings,write_product_listings,read_inventory,write_inventory
    HOST=https://your-app-url.com
    DATABASE_URL=file:./dev.db
+   SHOP_CUSTOM_DOMAIN=your-custom-domain.com  # Optional: for custom shop domains
+   NODE_ENV=development  # or production
    ```
+   
+   **Important**: All environment variables are validated on app startup. Missing required variables will cause the app to fail with a clear error message.
 
 5. Start the development server:
    ```bash
@@ -67,10 +74,19 @@ A Shopify app that synchronizes products and categories from your POS (Point of 
 3. Choose "Create app manually"
 4. Fill in the app details:
    - App name: POS Sync
-   - App URL: Your deployed app URL
+   - App URL: Your deployed app URL (e.g., `https://shopify-pos.tek-part.com`)
    - Allowed redirection URLs: `{your-url}/auth/callback`, `{your-url}/auth/shopify/callback`
 
 5. Copy the API key and secret to your `.env` file
+
+### Configuration Files
+
+This project uses two Shopify configuration files:
+
+- **`shopify.app.pos-sync.toml`**: Production configuration file (active)
+- **`shopify.app.toml`**: Template/example configuration file
+
+The production config (`shopify.app.pos-sync.toml`) is the active configuration used by the Shopify CLI. The other file serves as a template for development or additional environments.
 
 ### Configuration
 
@@ -88,9 +104,25 @@ After installing the app on a Shopify store:
 3. Click **Test Connection** to verify the settings
 4. Click **Save Settings**
 
+## Rate Limiting
+
+The app includes built-in rate limiting for Shopify GraphQL API requests to prevent hitting Shopify's rate limits:
+
+- **Token Bucket Algorithm**: Implements a token bucket with configurable refill rate
+- **Automatic Retry**: Automatically retries requests when rate limited (429 errors)
+- **Cost Estimation**: Estimates query cost based on complexity
+- **Per-Shop Limiting**: Rate limits are tracked per shop domain
+- **Conservative Defaults**: Uses 80% of Shopify's standard plan limits (80 points/second) to stay safe
+
+The rate limiter automatically handles:
+- Waiting for available tokens before making requests
+- Exponential backoff on rate limit errors
+- Parsing `Retry-After` headers
+- Adjusting token counts based on actual query costs from Shopify responses
+
 ## POS API Requirements
 
-Your POS system API should expose the following endpoints:
+This app is designed to work with TheOneAPIPOS system. Your POS system API should expose the following endpoints:
 
 ### Categories
 - `GET /Category/GetMainCategory` - Get all main categories
@@ -137,11 +169,24 @@ Responses can be:
 
 ## Deployment
 
+### Environment Variables
+
+**Required variables** (validated on startup):
+- `SHOPIFY_API_KEY` - Your Shopify app API key
+- `SHOPIFY_API_SECRET` - Your Shopify app API secret
+- `HOST` - Your app's public URL (e.g., `https://shopify-pos.tek-part.com`)
+- `SCOPES` - Comma-separated list of Shopify API scopes
+- `DATABASE_URL` - Database connection string
+
+**Optional variables**:
+- `SHOP_CUSTOM_DOMAIN` - Custom shop domain if applicable
+- `NODE_ENV` - Environment (development/production)
+
 ### Fly.io
 
 ```bash
 flyctl launch
-flyctl secrets set SHOPIFY_API_KEY=xxx SHOPIFY_API_SECRET=xxx HOST=https://your-app.fly.dev
+flyctl secrets set SHOPIFY_API_KEY=xxx SHOPIFY_API_SECRET=xxx HOST=https://your-app.fly.dev SCOPES="read_products,write_products,..."
 flyctl deploy
 ```
 
@@ -149,21 +194,25 @@ flyctl deploy
 
 1. Connect your GitHub repository to Render
 2. Create a new Web Service using `render.yaml`
-3. Add environment variables in the Render dashboard
+3. Add all required environment variables in the Render dashboard
+4. The scheduler will automatically start on deployment
 
 ### Railway
 
 1. Connect your GitHub repository to Railway
 2. Railway will auto-detect the configuration from `railway.toml`
-3. Add environment variables in the Railway dashboard
+3. Add all required environment variables in the Railway dashboard
+4. The app will validate environment variables on startup
 
-### Heroku
+### Hostinger / Other Hosting
 
-```bash
-heroku create shopify-pos-sync
-heroku config:set SHOPIFY_API_KEY=xxx SHOPIFY_API_SECRET=xxx HOST=https://your-app.herokuapp.com
-git push heroku main
-```
+See `HOSTINGER_SETUP.md` and `DEPLOYMENT_HOSTINGER.md` for detailed Hostinger deployment instructions.
+
+**Important Notes**:
+- The scheduler initializes automatically in all environments
+- Environment variables are validated on startup - missing variables will cause startup failure
+- Ensure your database is properly configured and accessible
+- The app uses SQLite by default - consider PostgreSQL for production with high traffic
 
 ## Project Structure
 
@@ -171,21 +220,79 @@ git push heroku main
 shopify-pos-sync/
 ├── app/
 │   ├── routes/
-│   │   ├── app._index.tsx      # Dashboard
-│   │   ├── app.settings.tsx    # API Configuration
+│   │   ├── app._index.tsx      # Dashboard with sync status
+│   │   ├── app.settings.tsx    # POS API Configuration
 │   │   ├── app.sync.tsx        # Manual sync trigger
-│   │   └── app.logs.tsx        # Sync history
+│   │   ├── app.logs.tsx        # Sync history and logs
+│   │   └── app.tsx             # App layout wrapper
 │   ├── services/
-│   │   ├── pos-api.server.ts   # POS API client with decryption
-│   │   ├── shopify-sync.server.ts  # Shopify sync logic
-│   │   └── scheduler.server.ts # Cron jobs
-│   └── models/
-│       └── settings.server.ts  # Database operations
+│   │   ├── pos-api.server.ts   # POS API client with AES decryption
+│   │   ├── shopify-sync.server.ts  # Main Shopify sync orchestration
+│   │   ├── scheduler.server.ts # Cron job scheduler (auto-initializes)
+│   │   └── rate-limiter.server.ts  # Shopify API rate limiting
+│   ├── models/
+│   │   └── settings.server.ts  # Database operations for settings/logs
+│   ├── shopify.server.ts       # Shopify app initialization (with env validation)
+│   └── db.server.ts            # Prisma database client
 ├── prisma/
-│   └── schema.prisma           # Database schema
-├── shopify.app.toml            # Shopify app config
+│   └── schema.prisma           # Database schema (Shop, SyncLog models)
+├── shopify.app.pos-sync.toml   # Production Shopify app config
+├── shopify.app.toml            # Template/example config
+├── api/                        # Legacy PHP API files (may not be in use)
 └── package.json
 ```
+
+## Scheduler
+
+The scheduler automatically initializes on app startup (in all environments, not just production). It:
+
+- Loads all configured shops from the database
+- Schedules sync jobs based on each shop's sync frequency
+- Supports: hourly, every 6 hours, every 12 hours, or daily
+- Can be manually triggered from the app dashboard
+- Logs all sync operations with success/failure status
+
+## Development Notes
+
+### Rate Limiting
+
+The app implements rate limiting to prevent hitting Shopify's API limits. The rate limiter:
+- Uses a token bucket algorithm
+- Tracks rate limits per shop domain
+- Automatically retries on 429 errors
+- Estimates query costs to manage token usage
+
+### Scheduler Behavior
+
+- **Auto-initialization**: The scheduler starts automatically when the app loads (all environments)
+- **Database-driven**: Schedules are loaded from the database on startup
+- **Per-shop configuration**: Each shop can have its own sync frequency
+- **Manual triggers**: Syncs can be triggered manually from the dashboard
+
+### Error Handling
+
+- All sync operations are logged to the database
+- Errors are captured and displayed in the sync logs
+- Failed syncs can be retried manually
+- Rate limit errors are automatically handled with retries
+
+## Troubleshooting
+
+### App won't start
+- Check that all required environment variables are set
+- Verify database connection string is correct
+- Check that Prisma schema is up to date (`npm run setup`)
+
+### Sync not running automatically
+- Verify the shop is configured in Settings
+- Check that sync frequency is set
+- Review scheduler logs in the console
+- Ensure the app is running (scheduler only runs when app is active)
+
+### Rate limit errors
+- The rate limiter should handle this automatically
+- If issues persist, check Shopify API status
+- Consider reducing sync frequency for large catalogs
 
 ## License
 
@@ -193,4 +300,4 @@ MIT License
 
 ## Support
 
-For questions or issues, please open a GitHub issue.
+For questions or issues, please check the deployment documentation files or open a GitHub issue.

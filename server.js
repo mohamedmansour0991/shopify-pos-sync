@@ -7,8 +7,9 @@ import http from "http";
 // Install globals for Node.js (Request, Response, etc.)
 installGlobals();
 
-const port = process.env.PORT || 3000;
-const host = "0.0.0.0";
+// Get port from environment (cPanel sets this automatically)
+const port = process.env.PORT || process.env.NODE_PORT || 3000;
+const host = process.env.IP || "0.0.0.0";
 
 const requestHandler = createRequestHandler(build, "production");
 
