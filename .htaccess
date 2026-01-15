@@ -5,13 +5,15 @@ RewriteEngine On
 <IfModule mod_proxy.c>
     ProxyPreserveHost On
     ProxyRequests Off
+    ProxyPassInterpolateEnv On
 </IfModule>
 
 # Proxy all requests to Node.js server (PM2)
-# Change port 3000 to your actual PM2 port if different
+# Only proxy if file/directory doesn't exist
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+RewriteCond %{REQUEST_URI} !^/build/
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
 
 # Serve static files directly (from build/client)
 RewriteCond %{REQUEST_FILENAME} -f
