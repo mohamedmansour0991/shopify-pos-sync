@@ -1,16 +1,21 @@
 # Enable Rewrite Engine
 RewriteEngine On
 
-# Proxy all requests to Node.js server (if using reverse proxy)
-# Uncomment these lines if you have Node.js running on a different port
-# RewriteCond %{REQUEST_FILENAME} !-f
-# RewriteCond %{REQUEST_FILENAME} !-d
-# RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+# Enable proxy module (required for reverse proxy)
+<IfModule mod_proxy.c>
+    ProxyPreserveHost On
+    ProxyRequests Off
+</IfModule>
 
-# For cPanel Node.js apps, the server should handle all routes
-# This ensures static files are served correctly
+# Proxy all requests to Node.js server (PM2)
+# Change port 3000 to your actual PM2 port if different
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+
+# Serve static files directly (from build/client)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(.*)$ - [L]
 
 # Security Headers
 <IfModule mod_headers.c>

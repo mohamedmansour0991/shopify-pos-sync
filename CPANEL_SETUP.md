@@ -1,87 +1,151 @@
-# cPanel Setup Guide
+# cPanel Setup Guide (SSH/PM2)
 
-## Steps to Deploy on cPanel
+## Steps to Deploy on cPanel via SSH
 
-### 1. Upload Files via Git
+### 1. Connect via SSH
 ```bash
+ssh your-username@your-server
 cd ~/public_html/shopify-pos.tek-part.com
+```
+
+### 2. Pull Latest Code
+```bash
 git pull origin main  # or your branch name
 ```
 
-### 2. Install Dependencies
+### 3. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Generate Prisma Client
+### 4. Generate Prisma Client
 ```bash
 npm run generate
 ```
 
-### 4. Build the Application
+### 5. Build the Application
 ```bash
 npm run build
 ```
 
-### 5. Set Up Node.js App in cPanel
+### 6. Set Up Environment Variables
 
-1. Log in to cPanel
-2. Go to **Software** → **Setup Node.js App**
-3. Click **Create Application**
-4. Configure:
-   - **Node.js version**: 20.x or higher
-   - **Application mode**: Production
-   - **Application root**: `shopify-pos.tek-part.com`
-   - **Application URL**: `shopify-pos.tek-part.com` (or your domain)
-   - **Application startup file**: `server.js`
-   - **Application port**: Leave default or set to available port
+Create a `.env` file in the project root:
+```bash
+nano .env
+```
 
-5. Add Environment Variables:
-   - `NODE_ENV=production`
-   - `SHOPIFY_API_KEY=your_api_key`
-   - `SHOPIFY_API_SECRET=your_api_secret`
-   - `HOST=https://shopify-pos.tek-part.com`
-   - `SCOPES=read_products,write_products,read_product_listings,write_product_listings,read_inventory,write_inventory`
-   - `DATABASE_URL=file:./prisma/dev.db` (or your database URL)
-   - `PORT` (will be set automatically by cPanel)
+Add the following:
+```env
+NODE_ENV=production
+SHOPIFY_API_KEY=your_api_key
+SHOPIFY_API_SECRET=your_api_secret
+HOST=https://shopify-pos.tek-part.com
+SCOPES=read_products,write_products,read_product_listings,write_product_listings,read_inventory,write_inventory
+DATABASE_URL=file:./prisma/dev.db
+PORT=3000
+```
 
-6. Click **Create**
+Save and exit (Ctrl+X, then Y, then Enter)
 
-### 6. Start the Application
+### 7. Database Setup
 
-In cPanel Node.js App Manager:
-1. Find your application
-2. Click **Run NPM Install** (if needed)
-3. Click **Start App**
+```bash
+# Create database file if it doesn't exist
+touch prisma/dev.db
+chmod 666 prisma/dev.db
 
-### 7. Verify File Permissions
+# Run database migrations
+npm run db:push
+```
+
+### 8. Install PM2 (if not already installed)
+
+```bash
+npm install -g pm2
+```
+
+### 9. Start Application with PM2
+
+```bash
+# Start the application
+pm2 start server.js --name shopify-pos-sync
+
+# Save PM2 configuration
+pm2 save
+
+# Setup PM2 to start on server reboot
+pm2 startup
+# Follow the instructions it provides
+```
+
+### 10. Configure Reverse Proxy (if needed)
+
+If your server uses Apache with mod_proxy, update `.htaccess`:
+
+### 11. Verify File Permissions
 
 Make sure these directories are writable:
 ```bash
 chmod 755 ~/public_html/shopify-pos.tek-part.com
 chmod 755 ~/public_html/shopify-pos.tek-part.com/build
 chmod 755 ~/public_html/shopify-pos.tek-part.com/prisma
-```
-
-### 8. Database Setup
-
-If using SQLite, ensure the database file is writable:
-```bash
-touch ~/public_html/shopify-pos.tek-part.com/prisma/dev.db
+chmod +x ~/public_html/shopify-pos.tek-part.com/server.js
 chmod 666 ~/public_html/shopify-pos.tek-part.com/prisma/dev.db
 ```
 
-Then run migrations:
+### 12. Check PM2 Status
+
 ```bash
-npm run db:push
+# Check if app is running
+pm2 status
+
+# View logs
+pm2 logs shopify-pos-sync
+
+# View real-time logs
+pm2 logs shopify-pos-sync --lines 50
+```
+
+## PM2 Commands Reference
+
+```bash
+# Start application
+pm2 start server.js --name shopify-pos-sync
+
+# Stop application
+pm2 stop shopify-pos-sync
+
+# Restart application
+pm2 restart shopify-pos-sync
+
+# Delete application from PM2
+pm2 delete shopify-pos-sync
+
+# View status
+pm2 status
+
+# View logs
+pm2 logs shopify-pos-sync
+
+# Monitor (real-time)
+pm2 monit
+
+# Reload (zero-downtime restart)
+pm2 reload shopify-pos-sync
 ```
 
 ## Troubleshooting 403 Forbidden Error
 
-### Check 1: Node.js App is Running
-- Go to cPanel → Node.js App Manager
-- Verify the app status shows "Running"
-- Check the logs for errors
+### Check 1: Application is Running
+```bash
+# Check PM2 status
+pm2 status
+
+# Should show "online" status for shopify-pos-sync
+# If not, check logs:
+pm2 logs shopify-pos-sync --lines 100
+```
 
 ### Check 2: File Permissions
 ```bash
@@ -92,13 +156,32 @@ chmod +x ~/public_html/shopify-pos.tek-part.com/server.js
 ```
 
 ### Check 3: Environment Variables
-- Verify all required environment variables are set in cPanel Node.js App Manager
-- Check that `HOST` matches your actual domain
+```bash
+# Check if .env file exists and has correct values
+cat .env
+
+# Or check environment in PM2
+pm2 env shopify-pos-sync
+```
 
 ### Check 4: Port Configuration
-- In cPanel Node.js App Manager, note the port number
-- The app should automatically use this port
-- If using a reverse proxy, configure it in `.htaccess`
+```bash
+# Check what port the app is using
+pm2 logs shopify-pos-sync | grep PORT
+
+# Or check in .env file
+grep PORT .env
+
+# Make sure the port matches your reverse proxy configuration
+```
+
+### Check 5: Reverse Proxy Configuration
+If using Apache, make sure `.htaccess` is configured correctly:
+```bash
+cat .htaccess
+```
+
+The `.htaccess` should proxy requests to your Node.js app on the correct port.
 
 ### Check 5: Build Output
 Ensure the build completed successfully:
@@ -121,16 +204,32 @@ pm2 startup
 
 ## Checking Logs
 
-### Application Logs
-In cPanel Node.js App Manager, click "View Logs" to see:
-- Application startup messages
-- Runtime errors
-- Console output
+### Application Logs (PM2)
+```bash
+# View all logs
+pm2 logs shopify-pos-sync
+
+# View last 100 lines
+pm2 logs shopify-pos-sync --lines 100
+
+# View error logs only
+pm2 logs shopify-pos-sync --err
+
+# View output logs only
+pm2 logs shopify-pos-sync --out
+
+# Follow logs in real-time
+pm2 logs shopify-pos-sync --lines 0
+```
 
 ### Server Logs
-Check cPanel error logs:
-- cPanel → Metrics → Errors
-- Or via SSH: `tail -f ~/logs/error_log`
+```bash
+# Apache error logs
+tail -f ~/logs/error_log
+
+# Or check cPanel error logs
+tail -f ~/public_html/shopify-pos.tek-part.com/error_log
+```
 
 ## Common Issues
 
