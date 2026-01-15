@@ -20,7 +20,7 @@
 ```toml
 client_id = "2e0d4096fb1c73f0851cb3bfb9e92210"
 name = "POS Sync"
-application_url = "https://pos-sync-shopify.tarawud.com"
+application_url = "https://shopify-pos.tek-part.com"
 embedded = true
 
 [build]
@@ -35,8 +35,8 @@ scopes = "read_inventory,read_product_listings,read_products,write_inventory,wri
 
 [auth]
 redirect_urls = [
-  "https://pos-sync-shopify.tarawud.com/auth/callback",
-  "https://pos-sync-shopify.tarawud.com/auth/shopify/callback"
+  "https://shopify-pos.tek-part.com/auth/callback",
+  "https://shopify-pos.tek-part.com/auth/shopify/callback"
 ]
 ```
 

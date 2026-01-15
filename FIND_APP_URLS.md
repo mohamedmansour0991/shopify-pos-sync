@@ -28,13 +28,13 @@
 
 1. **App URL:**
    ```
-   https://pos-sync-shopify.tarawud.com
+   https://shopify-pos.tek-part.com
    ```
 
 2. **Allowed redirection URLs:**
    ```
-   https://pos-sync-shopify.tarawud.com/auth/callback
-   https://pos-sync-shopify.tarawud.com/auth/shopify/callback
+   https://shopify-pos.tek-part.com/auth/callback
+   https://shopify-pos.tek-part.com/auth/shopify/callback
    ```
 
 ---
@@ -44,10 +44,10 @@
 1. ✅ من صفحة **POS Sync** الرئيسية
 2. ✅ اضغط **"App setup"** في القائمة الجانبية (ليس Settings)
 3. ✅ ابحث عن قسم **"App URLs"** أو **"App configuration"**
-4. ✅ حدث **App URL** إلى `https://pos-sync-shopify.tarawud.com`
+4. ✅ حدث **App URL** إلى `https://shopify-pos.tek-part.com`
 5. ✅ حدث **Redirect URLs** إلى:
-   - `https://pos-sync-shopify.tarawud.com/auth/callback`
-   - `https://pos-sync-shopify.tarawud.com/auth/shopify/callback`
+   - `https://shopify-pos.tek-part.com/auth/callback`
+   - `https://shopify-pos.tek-part.com/auth/shopify/callback`
 6. ✅ اضغط **Save**
 
 ---

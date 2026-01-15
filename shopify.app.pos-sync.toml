@@ -1,12 +1,20 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+#
+# PRODUCTION CONFIGURATION FILE
+# This is the active production configuration for the POS Sync app.
+# The shopify.app.toml file is a template/example - this file takes precedence.
+# 
+# To use this config with Shopify CLI, ensure this file is named correctly
+# or use: shopify app dev --config shopify.app.pos-sync.toml
 
 client_id = "2e0d4096fb1c73f0851cb3bfb9e92210"
 name = "POS Sync"
-application_url = "https://pos-sync-shopify.tarawud.com"
+application_url = "https://shopify-pos.tek-part.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = false
+dev_store_url = "tarawud1.myshopify.com"
 
 [webhooks]
 api_version = "2026-01"
@@ -17,6 +25,6 @@ scopes = "read_inventory,read_product_listings,read_products,write_inventory,wri
 
 [auth]
 redirect_urls = [
-  "https://pos-sync-shopify.tarawud.com/auth/callback",
-  "https://pos-sync-shopify.tarawud.com/auth/shopify/callback"
+  "https://shopify-pos.tek-part.com/auth/callback",
+  "https://shopify-pos.tek-part.com/auth/shopify/callback"
 ]

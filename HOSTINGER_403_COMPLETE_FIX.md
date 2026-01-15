@@ -59,7 +59,7 @@ PORT=3000
 SHOPIFY_API_KEY=your_key
 SHOPIFY_API_SECRET=your_secret
 SCOPES=read_products,write_products,read_product_listings,write_product_listings,read_inventory,write_inventory
-HOST=https://pos-sync-shopify.tarawud.com
+HOST=https://shopify-pos.tek-part.com
 DATABASE_URL=file:./prod.db
 NODE_ENV=production
 PORT=3000
@@ -74,7 +74,7 @@ PORT=3000
 ```
 🚀 Server running on http://0.0.0.0:3000
 📦 Environment: production
-🔗 HOST: https://pos-sync-shopify.tarawud.com
+🔗 HOST: https://shopify-pos.tek-part.com
 🌐 PORT: 3000
 ```
 
@@ -105,7 +105,7 @@ PORT=3000
 
 ### ✅ تحقق 2: Environment Variables
 - [ ] `PORT` موجود (أو اتركه فارغاً)
-- [ ] `HOST` محدث: `https://pos-sync-shopify.tarawud.com`
+- [ ] `HOST` محدث: `https://shopify-pos.tek-part.com`
 - [ ] جميع Environment Variables موجودة
 
 ### ✅ تحقق 3: Start Command

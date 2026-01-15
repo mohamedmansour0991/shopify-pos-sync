@@ -7,6 +7,34 @@ import {
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 
+// Validate required environment variables
+function validateEnvironmentVariables(): void {
+  const requiredVars = {
+    SHOPIFY_API_KEY: process.env.SHOPIFY_API_KEY,
+    SHOPIFY_API_SECRET: process.env.SHOPIFY_API_SECRET,
+    HOST: process.env.HOST,
+    SCOPES: process.env.SCOPES,
+  };
+
+  const missingVars: string[] = [];
+
+  for (const [key, value] of Object.entries(requiredVars)) {
+    if (!value || value.trim() === "") {
+      missingVars.push(key);
+    }
+  }
+
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars.join(", ")}\n` +
+        "Please ensure all required variables are set in your .env file or environment."
+    );
+  }
+}
+
+// Validate environment variables on module load
+validateEnvironmentVariables();
+
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",

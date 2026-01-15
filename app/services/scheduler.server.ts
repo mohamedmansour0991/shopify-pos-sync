@@ -185,7 +185,14 @@ export async function triggerImmediateSync(
   }
 }
 
-// Initialize scheduler when module loads (for production)
-if (process.env.NODE_ENV === "production") {
-  initializeScheduler().catch(console.error);
+// Initialize scheduler when module loads (works in all environments)
+// Only initializes if we're in a server context (not during build/test)
+if (typeof process !== "undefined" && process.env.NODE_ENV !== "test") {
+  // Use setImmediate to ensure database is ready
+  setImmediate(() => {
+    initializeScheduler().catch((error) => {
+      console.error("[Scheduler] Failed to auto-initialize:", error);
+      // Don't throw - allow app to continue even if scheduler init fails
+    });
+  });
 }

@@ -32,7 +32,7 @@ npm start
 تأكد من وجود:
 ```
 PORT=3000
-HOST=https://pos-sync-shopify.tarawud.com
+HOST=https://shopify-pos.tek-part.com
 NODE_ENV=production
 SHOPIFY_API_KEY=your_key
 SHOPIFY_API_SECRET=your_secret
@@ -58,7 +58,7 @@ DATABASE_URL=file:./prod.db
 ```
 🚀 Server running on http://0.0.0.0:3000
 📦 Environment: production
-🔗 HOST: https://pos-sync-shopify.tarawud.com
+🔗 HOST: https://shopify-pos.tek-part.com
 🌐 PORT: 3000
 ```
 
@@ -99,7 +99,7 @@ DATABASE_URL=file:./prod.db
 
 ### ✅ تحقق 2: Environment Variables
 - [ ] `PORT` موجود (أو اتركه فارغاً)
-- [ ] `HOST` محدث: `https://pos-sync-shopify.tarawud.com`
+- [ ] `HOST` محدث: `https://shopify-pos.tek-part.com`
 - [ ] جميع Environment Variables موجودة
 
 ### ✅ تحقق 3: Logs

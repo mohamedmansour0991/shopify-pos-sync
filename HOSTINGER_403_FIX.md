@@ -16,7 +16,7 @@
 - `SHOPIFY_API_KEY`
 - `SHOPIFY_API_SECRET`
 - `SCOPES`
-- `HOST` (يجب أن يكون `https://pos-sync-shopify.tarawud.com`)
+- `HOST` (يجب أن يكون `https://shopify-pos.tek-part.com`)
 - `DATABASE_URL`
 - `NODE_ENV`
 

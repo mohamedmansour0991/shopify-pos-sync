@@ -3,7 +3,7 @@
 ## 🎉 تم تحديث الإعدادات بنجاح!
 
 **pos-sync-3** هو الآن **Active** والإعدادات صحيحة:
-- ✅ App URL: `https://pos-sync-shopify.tarawud.com`
+- ✅ App URL: `https://shopify-pos.tek-part.com`
 - ✅ Redirect URLs: محدثة بشكل صحيح
 - ✅ Scopes: صحيحة
 
@@ -20,7 +20,7 @@
    ```
    🚀 Server running on http://0.0.0.0:3000
    📦 Environment: production
-   🔗 HOST: https://pos-sync-shopify.tarawud.com
+   🔗 HOST: https://shopify-pos.tek-part.com
    🌐 PORT: 3000
    ```
 

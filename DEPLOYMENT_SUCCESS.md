@@ -12,13 +12,13 @@
 
 ### App URL:
 ```
-https://pos-sync-shopify.tarawud.com
+https://shopify-pos.tek-part.com
 ```
 
 ### Redirect URLs:
 ```
-https://pos-sync-shopify.tarawud.com/auth/callback
-https://pos-sync-shopify.tarawud.com/auth/shopify/callback
+https://shopify-pos.tek-part.com/auth/callback
+https://shopify-pos.tek-part.com/auth/shopify/callback
 ```
 
 ---
@@ -31,10 +31,10 @@ https://pos-sync-shopify.tarawud.com/auth/shopify/callback
 2. Apps → POS Sync → Versions
 3. اضغط على **pos-sync-3** (النسخة الجديدة)
 4. تحقق من أن:
-   - **App URL** = `https://pos-sync-shopify.tarawud.com`
+   - **App URL** = `https://shopify-pos.tek-part.com`
    - **Redirect URLs** تحتوي على:
-     - `https://pos-sync-shopify.tarawud.com/auth/callback`
-     - `https://pos-sync-shopify.tarawud.com/auth/shopify/callback`
+     - `https://shopify-pos.tek-part.com/auth/callback`
+     - `https://shopify-pos.tek-part.com/auth/shopify/callback`
 
 ---
 
@@ -42,7 +42,7 @@ https://pos-sync-shopify.tarawud.com/auth/shopify/callback
 
 1. تحقق من Logs في Hostinger Dashboard
 2. تأكد من أن التطبيق يعمل على:
-   - `https://pos-sync-shopify.tarawud.com`
+   - `https://shopify-pos.tek-part.com`
 3. جرب الوصول من Shopify Admin:
    - Shopify Admin → Apps → POS Sync
 

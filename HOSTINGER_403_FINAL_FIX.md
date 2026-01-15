@@ -63,7 +63,7 @@ public_html/
 ```
 🚀 Server running on http://0.0.0.0:3000
 📦 Environment: production
-🔗 HOST: https://pos-sync-shopify.tarawud.com
+🔗 HOST: https://shopify-pos.tek-part.com
 ```
 
 **إذا لم تر هذه الرسائل:**
@@ -91,7 +91,7 @@ public_html/
 
 ### ✅ تحقق 2: Environment Variables
 - [ ] `PORT` موجود (أو اتركه فارغاً)
-- [ ] `HOST` محدث: `https://pos-sync-shopify.tarawud.com`
+- [ ] `HOST` محدث: `https://shopify-pos.tek-part.com`
 - [ ] جميع Environment Variables موجودة
 
 ### ✅ تحقق 3: Start Command

@@ -1,4 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+#
+# NOTE: This is a template/example configuration file.
+# The actual production configuration is in shopify.app.pos-sync.toml
+# This file can be used as a template for development or additional environments.
+# For production, use shopify.app.pos-sync.toml or create environment-specific configs.
 
 name = "POS Sync"
 client_id = "954c38f0f66ea4bd832d4c5a3b0bfcdc"
@@ -22,4 +27,4 @@ embedded = false
 
 [build]
 automatically_update_urls_on_dev = true
-dev_store_url = "tarawud.myshopify.com"
+   dev_store_url = "your-second-store.myshopify.com"

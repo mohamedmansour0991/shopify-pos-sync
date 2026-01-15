@@ -25,10 +25,10 @@ Version جديد تم إنشاؤه: **pos-sync-3** بالإعدادات الجد
 
 1. اضغط على **"pos-sync-3"**
 2. تحقق من:
-   - **App URL** = `https://pos-sync-shopify.tarawud.com`
+   - **App URL** = `https://shopify-pos.tek-part.com`
    - **Redirect URLs** = 
-     - `https://pos-sync-shopify.tarawud.com/auth/callback`
-     - `https://pos-sync-shopify.tarawud.com/auth/shopify/callback`
+     - `https://shopify-pos.tek-part.com/auth/callback`
+     - `https://shopify-pos.tek-part.com/auth/shopify/callback`
 
 ---
 

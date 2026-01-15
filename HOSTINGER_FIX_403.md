@@ -63,7 +63,7 @@ remix-serve ./build/server/index.js
 
 ### ✅ تحقق 2: Environment Variables
 - [ ] `PORT` موجود (أو اتركه فارغاً)
-- [ ] `HOST` محدث: `https://pos-sync-shopify.tarawud.com`
+- [ ] `HOST` محدث: `https://shopify-pos.tek-part.com`
 - [ ] جميع Environment Variables موجودة
 
 ### ✅ تحقق 3: Start Command

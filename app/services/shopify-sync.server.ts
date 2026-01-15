@@ -2,6 +2,7 @@ import type { AdminApiContext } from "@shopify/shopify-app-remix/server";
 import type { PosCategory, PosProduct, PosConfig } from "./pos-api.server";
 import { getAllCategories, getAllProducts } from "./pos-api.server";
 import { createSyncLog, updateLastSync } from "../models/settings.server";
+import { rateLimitedGraphQL } from "./rate-limiter.server";
 
 export interface SyncResult {
   success: boolean;
@@ -13,6 +14,25 @@ export interface SyncResult {
 interface CollectionMapping {
   posId: number;
   shopifyId: string;
+}
+
+/**
+ * Create a rate-limited GraphQL function wrapper
+ */
+function createRateLimitedGraphQL(
+  admin: AdminApiContext["admin"],
+  shopDomain: string
+) {
+  return async <T = any>(
+    query: string,
+    variables?: Record<string, any>
+  ): Promise<T> => {
+    return rateLimitedGraphQL<T>(
+      shopDomain,
+      () => admin.graphql(query, variables ? { variables } : undefined),
+      query
+    );
+  };
 }
 
 /**
@@ -47,7 +67,7 @@ export async function syncPosToShopify(
         const isSubcategory = category.ParentID && category.ParentID > 0;
         console.log(`[${shopDomain}] Syncing ${isSubcategory ? 'subcategory' : 'category'} ${category.CategoryID} (${category.CategoryName})${isSubcategory ? ` - Parent: ${category.ParentID}` : ''}...`);
         
-        const collectionId = await syncCategoryToCollection(admin, category);
+        const collectionId = await syncCategoryToCollection(admin, shopDomain, category);
         if (collectionId) {
           collectionMapping.push({
             posId: category.CategoryID,
@@ -151,6 +171,7 @@ export async function syncPosToShopify(
  */
 async function syncCategoryToCollection(
   admin: AdminApiContext["admin"],
+  shopDomain: string,
   category: PosCategory
 ): Promise<string | null> {
   // Get title with fallbacks
@@ -163,8 +184,11 @@ async function syncCategoryToCollection(
   const handle = generateHandle(title, category.CategoryID);
   console.log(`[Shopify Sync] Processing category: ${title} (ID: ${category.CategoryID}, Handle: ${handle})`);
 
+  // Create rate-limited GraphQL function
+  const graphql = createRateLimitedGraphQL(admin, shopDomain);
+
   // First, try to find existing collection by handle
-  const existingCollection = await findCollectionByHandle(admin, handle);
+  const existingCollection = await findCollectionByHandle(graphql, handle);
   
   if (existingCollection) {
     console.log(`[Shopify Sync] Found existing collection: ${existingCollection.id}`);
@@ -174,7 +198,7 @@ async function syncCategoryToCollection(
 
   if (existingCollection) {
     // Update existing collection
-    const response = await admin.graphql(
+    const data = await graphql(
       `#graphql
       mutation collectionUpdate($input: CollectionInput!) {
         collectionUpdate(input: $input) {
@@ -188,19 +212,15 @@ async function syncCategoryToCollection(
         }
       }`,
       {
-        variables: {
-          input: {
-            id: existingCollection.id,
-            title,
-            descriptionHtml: category.CategoryNameAr
-              ? `<p>${category.CategoryNameAr}</p>`
-              : "",
-          },
+        input: {
+          id: existingCollection.id,
+          title,
+          descriptionHtml: category.CategoryNameAr
+            ? `<p>${category.CategoryNameAr}</p>`
+            : "",
         },
       }
     );
-
-    const data = await response.json();
     if (data.data?.collectionUpdate?.userErrors?.length > 0) {
       const errorMsg = data.data.collectionUpdate.userErrors[0].message;
       console.error(`[Shopify Sync] ❌ Failed to update collection ${title}: ${errorMsg}`);
@@ -211,7 +231,7 @@ async function syncCategoryToCollection(
   }
 
   // Create new collection
-  const response = await admin.graphql(
+  const data = await graphql(
     `#graphql
     mutation collectionCreate($input: CollectionInput!) {
       collectionCreate(input: $input) {
@@ -225,19 +245,15 @@ async function syncCategoryToCollection(
       }
     }`,
     {
-      variables: {
-        input: {
-          title,
-          handle,
-          descriptionHtml: category.CategoryNameAr
-            ? `<p>${category.CategoryNameAr}</p>`
-            : "",
-        },
+      input: {
+        title,
+        handle,
+        descriptionHtml: category.CategoryNameAr
+          ? `<p>${category.CategoryNameAr}</p>`
+          : "",
       },
     }
   );
-
-  const data = await response.json();
   if (data.data?.collectionCreate?.userErrors?.length > 0) {
     const errorMsg = data.data.collectionCreate.userErrors[0].message;
     console.error(`[Shopify Sync] ❌ Failed to create collection ${title}: ${errorMsg}`);
@@ -258,22 +274,19 @@ async function syncCategoryToCollection(
  * Find a collection by handle
  */
 async function findCollectionByHandle(
-  admin: AdminApiContext["admin"],
+  graphql: ReturnType<typeof createRateLimitedGraphQL>,
   handle: string
 ): Promise<{ id: string } | null> {
-  const response = await admin.graphql(
+  const data = await graphql(
     `#graphql
     query collectionByHandle($handle: String!) {
       collectionByHandle(handle: $handle) {
         id
       }
     }`,
-    {
-      variables: { handle },
-    }
+    { handle }
   );
 
-  const data = await response.json();
   return data.data?.collectionByHandle || null;
 }
 
@@ -295,17 +308,20 @@ async function syncProductToShopify(
   
   console.log(`[Shopify Sync] Syncing product: ${title} (SKU: ${sku}, Collection ID: ${collectionId || 'none'})`);
 
+  // Create rate-limited GraphQL function
+  const graphql = createRateLimitedGraphQL(admin, shopDomain);
+
   // First, try to find existing product by SKU or by POS ID tag
-  let existingProduct = await findProductBySku(admin, sku);
+  let existingProduct = await findProductBySku(graphql, sku);
   
   // If not found by SKU, try to find by POS ID tag
   if (!existingProduct) {
-    existingProduct = await findProductByPosId(admin, product.ProductID);
+    existingProduct = await findProductByPosId(graphql, product.ProductID);
   }
 
   if (existingProduct) {
     // Update existing product
-    const response = await admin.graphql(
+    const data = await graphql(
       `#graphql
       mutation productUpdate($input: ProductInput!) {
         productUpdate(input: $input) {
@@ -326,18 +342,14 @@ async function syncProductToShopify(
         }
       }`,
       {
-        variables: {
-          input: {
-            id: existingProduct.id,
-            title,
-            descriptionHtml: buildProductDescription(product),
-            status: product.IsActive ? "ACTIVE" : "DRAFT",
-          },
+        input: {
+          id: existingProduct.id,
+          title,
+          descriptionHtml: buildProductDescription(product),
+          status: product.IsActive ? "ACTIVE" : "DRAFT",
         },
       }
     );
-
-    const data = await response.json();
     if (data.data?.productUpdate?.userErrors?.length > 0) {
       throw new Error(data.data.productUpdate.userErrors[0].message);
     }
@@ -345,7 +357,7 @@ async function syncProductToShopify(
     // Update variant using productVariantsBulkUpdate
     if (existingProduct.variantId) {
       const safePrice = product.Price || 0;
-      await updateVariantBulk(admin, shopDomain, existingProduct.id, existingProduct.variantId, {
+      await updateVariantBulk(graphql, existingProduct.id, existingProduct.variantId, {
         price: safePrice,
         sku: sku,
         barcode: product.Barcode,
@@ -354,7 +366,7 @@ async function syncProductToShopify(
 
     // Update collection assignment
     if (collectionId) {
-      await addProductToCollection(admin, existingProduct.id, collectionId);
+      await addProductToCollection(graphql, existingProduct.id, collectionId);
     }
 
     console.log(`[Shopify Sync] ✅ Successfully updated product: ${title} (ID: ${existingProduct.id})`);
@@ -362,7 +374,7 @@ async function syncProductToShopify(
   }
 
   // Create new product
-  const response = await admin.graphql(
+  const data = await graphql(
     `#graphql
     mutation productCreate($input: ProductInput!) {
       productCreate(input: $input) {
@@ -383,22 +395,18 @@ async function syncProductToShopify(
       }
     }`,
     {
-      variables: {
-        input: {
-          title,
-          descriptionHtml: buildProductDescription(product),
-          status: product.IsActive ? "ACTIVE" : "DRAFT",
-          productType: product.CategoryName || "",
-          tags: [
-            `pos-id:${product.ProductID}`,
-            product.CategoryName || "",
-          ].filter(Boolean),
-        },
+      input: {
+        title,
+        descriptionHtml: buildProductDescription(product),
+        status: product.IsActive ? "ACTIVE" : "DRAFT",
+        productType: product.CategoryName || "",
+        tags: [
+          `pos-id:${product.ProductID}`,
+          product.CategoryName || "",
+        ].filter(Boolean),
       },
     }
   );
-
-  const data = await response.json();
   if (data.data?.productCreate?.userErrors?.length > 0) {
     throw new Error(data.data.productCreate.userErrors[0].message);
   }
@@ -412,7 +420,7 @@ async function syncProductToShopify(
   // Update variant using productVariantsBulkUpdate
   if (variantId) {
     const safePrice = product.Price || 0;
-    await updateVariantBulk(admin, shopDomain, productId, variantId, {
+    await updateVariantBulk(graphql, productId, variantId, {
       price: safePrice,
       sku: sku,
       barcode: product.Barcode,
@@ -421,13 +429,13 @@ async function syncProductToShopify(
 
   // Add product to collection
   if (collectionId) {
-    await addProductToCollection(admin, productId, collectionId);
+    await addProductToCollection(graphql, productId, collectionId);
   }
 
   // Add product images
   if (product.ImageURL || (product.Images && product.Images.length > 0)) {
     await addProductImages(
-      admin,
+      graphql,
       productId,
       product.ImageURL ? [product.ImageURL] : product.Images || []
     );
@@ -441,10 +449,10 @@ async function syncProductToShopify(
  * Find a product by SKU
  */
 async function findProductBySku(
-  admin: AdminApiContext["admin"],
+  graphql: ReturnType<typeof createRateLimitedGraphQL>,
   sku: string
 ): Promise<{ id: string; variantId?: string } | null> {
-  const response = await admin.graphql(
+  const data = await graphql(
     `#graphql
     query productsBySku($query: String!) {
       products(first: 1, query: $query) {
@@ -462,12 +470,8 @@ async function findProductBySku(
         }
       }
     }`,
-    {
-      variables: { query: `sku:${sku}` },
-    }
+    { query: `sku:${sku}` }
   );
-
-  const data = await response.json();
   const product = data.data?.products?.edges?.[0]?.node;
 
   if (!product) return null;
@@ -482,10 +486,10 @@ async function findProductBySku(
  * Find a product by POS ID tag
  */
 async function findProductByPosId(
-  admin: AdminApiContext["admin"],
+  graphql: ReturnType<typeof createRateLimitedGraphQL>,
   posId: number
 ): Promise<{ id: string; variantId?: string } | null> {
-  const response = await admin.graphql(
+  const data = await graphql(
     `#graphql
     query productsByTag($query: String!) {
       products(first: 1, query: $query) {
@@ -503,12 +507,8 @@ async function findProductByPosId(
         }
       }
     }`,
-    {
-      variables: { query: `tag:pos-id:${posId}` },
-    }
+    { query: `tag:pos-id:${posId}` }
   );
-
-  const data = await response.json();
   const product = data.data?.products?.edges?.[0]?.node;
 
   if (!product) return null;
@@ -523,8 +523,7 @@ async function findProductByPosId(
  * Update variant using productVariantsBulkUpdate for price, then REST API for SKU and barcode
  */
 async function updateVariantBulk(
-  admin: AdminApiContext["admin"],
-  shopDomain: string,
+  graphql: ReturnType<typeof createRateLimitedGraphQL>,
   productId: string,
   variantId: string,
   details: { price: number; sku?: string; barcode?: string }
@@ -532,7 +531,7 @@ async function updateVariantBulk(
   const safePrice = details.price || 0;
   
   // First, update price using productVariantsBulkUpdate
-  const response = await admin.graphql(
+  const data = await graphql(
     `#graphql
     mutation productVariantsBulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
       productVariantsBulkUpdate(productId: $productId, variants: $variants) {
@@ -549,19 +548,15 @@ async function updateVariantBulk(
       }
     }`,
     {
-      variables: {
-        productId: productId,
-        variants: [
-          {
-            id: variantId,
-            price: safePrice.toFixed(2),
-          }
-        ],
-      },
+      productId: productId,
+      variants: [
+        {
+          id: variantId,
+          price: safePrice.toFixed(2),
+        }
+      ],
     }
   );
-  
-  const data = await response.json();
   if (data.data?.productVariantsBulkUpdate?.userErrors?.length > 0) {
     throw new Error(data.data.productVariantsBulkUpdate.userErrors[0].message);
   }
@@ -655,7 +650,7 @@ async function updateVariantDetails(
  * Add product to collection
  */
 async function addProductToCollection(
-  admin: AdminApiContext["admin"],
+  graphql: ReturnType<typeof createRateLimitedGraphQL>,
   productId: string,
   collectionId: string
 ): Promise<void> {
@@ -665,7 +660,7 @@ async function addProductToCollection(
   }
   
   console.log(`[Shopify Sync] Adding product ${productId} to collection ${collectionId}`);
-  const response = await admin.graphql(
+  const data = await graphql(
     `#graphql
     mutation collectionAddProducts($id: ID!, $productIds: [ID!]!) {
       collectionAddProducts(id: $id, productIds: $productIds) {
@@ -679,14 +674,12 @@ async function addProductToCollection(
       }
     }`,
     {
-      variables: {
         id: collectionId,
         productIds: [productId],
       },
     }
   );
   
-  const data = await response.json();
   if (data.data?.collectionAddProducts?.userErrors?.length > 0) {
     const errorMsg = data.data.collectionAddProducts.userErrors[0].message;
     console.error(`[Shopify Sync] ❌ Failed to add product to collection: ${errorMsg}`);
@@ -700,7 +693,7 @@ async function addProductToCollection(
  * Add images to a product
  */
 async function addProductImages(
-  admin: AdminApiContext["admin"],
+  graphql: ReturnType<typeof createRateLimitedGraphQL>,
   productId: string,
   imageUrls: string[]
 ): Promise<void> {
@@ -709,7 +702,7 @@ async function addProductImages(
     mediaContentType: "IMAGE",
   }));
 
-  await admin.graphql(
+  await graphql(
     `#graphql
     mutation productCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
       productCreateMedia(productId: $productId, media: $media) {
@@ -725,10 +718,8 @@ async function addProductImages(
       }
     }`,
     {
-      variables: {
-        productId,
-        media,
-      },
+      productId,
+      media,
     }
   );
 }

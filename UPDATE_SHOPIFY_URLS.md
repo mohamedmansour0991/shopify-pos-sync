@@ -18,13 +18,13 @@
 
    **App URL:**
    ```
-   https://pos-sync-shopify.tarawud.com
+   https://shopify-pos.tek-part.com
    ```
 
    **Allowed redirection URLs:**
    ```
-   https://pos-sync-shopify.tarawud.com/auth/callback
-   https://pos-sync-shopify.tarawud.com/auth/shopify/callback
+   https://shopify-pos.tek-part.com/auth/callback
+   https://shopify-pos.tek-part.com/auth/shopify/callback
    ```
 
 4. اضغط **Save** لحفظ التغييرات
@@ -52,10 +52,10 @@ shopify app config push
 
 1. في Partners Dashboard → **App setup** → **App URLs**
 2. تأكد من أن:
-   - **App URL** = `https://pos-sync-shopify.tarawud.com`
+   - **App URL** = `https://shopify-pos.tek-part.com`
    - **Redirect URLs** تحتوي على:
-     - `https://pos-sync-shopify.tarawud.com/auth/callback`
-     - `https://pos-sync-shopify.tarawud.com/auth/shopify/callback`
+     - `https://shopify-pos.tek-part.com/auth/callback`
+     - `https://shopify-pos.tek-part.com/auth/shopify/callback`
 
 ---
 
@@ -79,10 +79,10 @@ shopify app config push
 
 1. ✅ اذهب إلى Partners Dashboard → Apps → POS Sync
 2. ✅ اضغط **App setup** → **App URLs**
-3. ✅ حدث **App URL** إلى `https://pos-sync-shopify.tarawud.com`
+3. ✅ حدث **App URL** إلى `https://shopify-pos.tek-part.com`
 4. ✅ حدث **Redirect URLs** إلى:
-   - `https://pos-sync-shopify.tarawud.com/auth/callback`
-   - `https://pos-sync-shopify.tarawud.com/auth/shopify/callback`
+   - `https://shopify-pos.tek-part.com/auth/callback`
+   - `https://shopify-pos.tek-part.com/auth/shopify/callback`
 5. ✅ اضغط **Save**
 6. ✅ شغّل `shopify app deploy` من Terminal
 7. ✅ اختبر التطبيق

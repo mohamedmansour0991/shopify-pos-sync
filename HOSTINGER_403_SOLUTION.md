@@ -92,5 +92,5 @@ PORT=${PORT:-3000} npm start
 
 1. تحقق من Logs في Hostinger Dashboard
 2. تأكد من أن جميع Environment Variables موجودة
-3. تحقق من أن `HOST` محدث: `https://pos-sync-shopify.tarawud.com`
+3. تحقق من أن `HOST` محدث: `https://shopify-pos.tek-part.com`
 4. اتصل بدعم Hostinger إذا لزم الأمر
