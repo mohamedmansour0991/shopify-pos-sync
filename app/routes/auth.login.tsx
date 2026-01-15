@@ -12,7 +12,7 @@ import {
 } from "@shopify/polaris";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { useState } from "react";
-import { login } from "../../shopify.server";
+import { login } from "../shopify.server";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
