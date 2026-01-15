@@ -58,17 +58,20 @@ foreach ($_SERVER as $key => $value) {
         $headerName = str_replace('_', '-', substr($key, 5));
         $lowerName = strtolower($headerName);
         // Skip some headers that shouldn't be forwarded
-        if (!in_array($lowerName, ['host', 'connection', 'content-length', 'transfer-encoding'])) {
+        if (!in_array($lowerName, ['host', 'connection', 'content-length', 'transfer-encoding', 'content-type'])) {
             $headers[] = "$headerName: $value";
         }
     }
 }
-// Also handle Content-Type and Content-Length from $_SERVER
-if (isset($_SERVER['CONTENT_TYPE'])) {
-    $headers[] = "Content-Type: " . $_SERVER['CONTENT_TYPE'];
-}
-if (isset($_SERVER['CONTENT_LENGTH'])) {
-    $headers[] = "Content-Length: " . $_SERVER['CONTENT_LENGTH'];
+// Handle Content-Type and Content-Length from $_SERVER (only for POST/PUT/PATCH/DELETE)
+// Don't send Content-Type for GET/HEAD requests as it may cause issues
+if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+    if (isset($_SERVER['CONTENT_TYPE']) && !empty($_SERVER['CONTENT_TYPE'])) {
+        $headers[] = "Content-Type: " . $_SERVER['CONTENT_TYPE'];
+    }
+    if (isset($_SERVER['CONTENT_LENGTH']) && !empty($_SERVER['CONTENT_LENGTH'])) {
+        $headers[] = "Content-Length: " . $_SERVER['CONTENT_LENGTH'];
+    }
 }
 // Add X-Forwarded-Proto for HTTPS
 if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
@@ -88,9 +91,22 @@ if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
     if (!empty($body)) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
         // Ensure Content-Length is set if not already in headers
-        if (!isset($_SERVER['CONTENT_LENGTH'])) {
+        $hasContentLength = false;
+        foreach ($headers as $header) {
+            if (stripos($header, 'Content-Length:') === 0) {
+                $hasContentLength = true;
+                break;
+            }
+        }
+        if (!$hasContentLength) {
             $headers[] = "Content-Length: " . strlen($body);
         }
+    } else {
+        // If no body, remove Content-Type and Content-Length headers
+        $headers = array_filter($headers, function($header) {
+            $lower = strtolower($header);
+            return strpos($lower, 'content-type:') !== 0 && strpos($lower, 'content-length:') !== 0;
+        });
     }
 }
 
