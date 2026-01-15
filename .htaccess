@@ -1,15 +1,17 @@
 # Enable Rewrite Engine
 RewriteEngine On
 
-# Set DirectoryIndex
+# Set DirectoryIndex - this should route / to index.php
 DirectoryIndex index.php index.html
 
 # Serve static files directly (from build/client) - FIRST PRIORITY
+# This allows direct access to files that exist
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^(.*)$ - [L]
 
 # PHP Proxy Method (Primary - works reliably on cPanel)
-# Route all non-file requests to index.php which proxies to Node.js
+# Route all non-file, non-directory requests to index.php which proxies to Node.js
+# Exclude test files and build directory
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/build/
