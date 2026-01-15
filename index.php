@@ -63,16 +63,7 @@ foreach ($_SERVER as $key => $value) {
         }
     }
 }
-// Handle Content-Type and Content-Length from $_SERVER (only for POST/PUT/PATCH/DELETE)
-// Don't send Content-Type for GET/HEAD requests as it may cause issues
-if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-    if (isset($_SERVER['CONTENT_TYPE']) && !empty($_SERVER['CONTENT_TYPE'])) {
-        $headers[] = "Content-Type: " . $_SERVER['CONTENT_TYPE'];
-    }
-    if (isset($_SERVER['CONTENT_LENGTH']) && !empty($_SERVER['CONTENT_LENGTH'])) {
-        $headers[] = "Content-Length: " . $_SERVER['CONTENT_LENGTH'];
-    }
-}
+
 // Add X-Forwarded-Proto for HTTPS
 if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
     (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
@@ -83,14 +74,18 @@ if (isset($_SERVER['HTTP_HOST'])) {
     $headers[] = "X-Forwarded-Host: " . $_SERVER['HTTP_HOST'];
 }
 
-// Forward request body for POST/PUT/PATCH/DELETE
+// Forward request body ONLY for POST/PUT/PATCH/DELETE
 if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
     // Read raw body
     $body = file_get_contents('php://input');
     
     if (!empty($body)) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-        // Ensure Content-Length is set if not already in headers
+        // Add Content-Type and Content-Length only if body exists
+        if (isset($_SERVER['CONTENT_TYPE']) && !empty($_SERVER['CONTENT_TYPE'])) {
+            $headers[] = "Content-Type: " . $_SERVER['CONTENT_TYPE'];
+        }
+        // Ensure Content-Length is set
         $hasContentLength = false;
         foreach ($headers as $header) {
             if (stripos($header, 'Content-Length:') === 0) {
@@ -101,14 +96,10 @@ if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
         if (!$hasContentLength) {
             $headers[] = "Content-Length: " . strlen($body);
         }
-    } else {
-        // If no body, remove Content-Type and Content-Length headers
-        $headers = array_filter($headers, function($header) {
-            $lower = strtolower($header);
-            return strpos($lower, 'content-type:') !== 0 && strpos($lower, 'content-length:') !== 0;
-        });
     }
 }
+// For GET/HEAD requests, explicitly ensure no Content-Type or Content-Length
+// This is critical to prevent FormData parsing errors
 
 if (!empty($headers)) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
