@@ -105,8 +105,17 @@ if (in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
         }
     }
 }
-// For GET/HEAD requests, explicitly ensure no Content-Type or Content-Length
-// This is critical to prevent FormData parsing errors
+// For GET/HEAD requests, explicitly remove any Content-Type or Content-Length headers
+// This is critical to prevent FormData parsing errors in Shopify login()
+if (in_array($requestMethod, ['GET', 'HEAD'])) {
+    $headers = array_filter($headers, function($header) {
+        $lower = strtolower($header);
+        return strpos($lower, 'content-type:') !== 0 && 
+               strpos($lower, 'content-length:') !== 0;
+    });
+    // Reset array keys after filtering
+    $headers = array_values($headers);
+}
 
 if (!empty($headers)) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);

@@ -62,7 +62,8 @@ const server = http.createServer(async (req, res) => {
       headers: new Headers(req.headers),
     };
 
-    // Add body for POST/PUT/PATCH/DELETE requests
+    // Add body ONLY for POST/PUT/PATCH/DELETE requests
+    // For GET/HEAD, explicitly ensure no body is set
     if (req.method !== "GET" && req.method !== "HEAD") {
       const chunks = [];
       for await (const chunk of req) {
@@ -71,6 +72,10 @@ const server = http.createServer(async (req, res) => {
       if (chunks.length > 0) {
         requestInit.body = Buffer.concat(chunks);
       }
+    } else {
+      // Explicitly ensure no body for GET/HEAD requests
+      // This prevents FormData parsing errors
+      requestInit.body = undefined;
     }
 
     const request = new Request(url, requestInit);
