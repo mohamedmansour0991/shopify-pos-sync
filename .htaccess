@@ -1,31 +1,18 @@
 # Enable Rewrite Engine
 RewriteEngine On
 
-# Method 1: Try using mod_proxy (if enabled)
-<IfModule mod_proxy.c>
-    ProxyPreserveHost On
-    ProxyRequests Off
-    
-    # Proxy all requests to Node.js server (PM2)
-    # Only proxy if file/directory doesn't exist
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} !^/build/
-    RewriteCond %{REQUEST_URI} !^/index.php
-    RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
-</IfModule>
+# Serve static files directly (from build/client) - FIRST PRIORITY
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(.*)$ - [L]
 
-# Method 2: Fallback to PHP proxy (if mod_proxy doesn't work)
-# If the file doesn't exist and it's not a static file, route to index.php
+# PHP Proxy Method (Primary - works reliably on cPanel)
+# Route all non-file requests to index.php which proxies to Node.js
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/build/
 RewriteCond %{REQUEST_URI} !^/index.php
-RewriteRule ^(.*)$ index.php [L]
-
-# Serve static files directly (from build/client)
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^(.*)$ - [L]
+RewriteCond %{REQUEST_URI} !^/test-proxy.php
+RewriteRule ^(.*)$ index.php [L,QSA]
 
 # Security Headers
 <IfModule mod_headers.c>
