@@ -62,11 +62,29 @@ npm install -g pm2
 ```
 
 ### 9. تشغيل التطبيق باستخدام PM2
+
+**الطريقة الأولى: استخدام ملف ecosystem.config.js (موصى بها)**
 ```bash
 # إيقاف التطبيق القديم إن وجد
 pm2 delete shopify-pos-sync 2>/dev/null || true
 
-# تشغيل التطبيق
+# تشغيل التطبيق باستخدام ملف الإعداد
+pm2 start ecosystem.config.js
+
+# حفظ إعدادات PM2
+pm2 save
+
+# إعداد PM2 للبدء تلقائياً عند إعادة تشغيل السيرفر
+pm2 startup
+# اتبع التعليمات التي تظهر
+```
+
+**الطريقة الثانية: تشغيل مباشر (server.js يقرأ .env تلقائياً)**
+```bash
+# إيقاف التطبيق القديم إن وجد
+pm2 delete shopify-pos-sync 2>/dev/null || true
+
+# تشغيل التطبيق مباشرة
 pm2 start server.js --name shopify-pos-sync
 
 # حفظ إعدادات PM2

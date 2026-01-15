@@ -67,7 +67,27 @@ npm install -g pm2
 
 ### 9. Start Application with PM2
 
+**Option 1: Using ecosystem.config.js (Recommended)**
 ```bash
+# Stop old instance if exists
+pm2 delete shopify-pos-sync 2>/dev/null || true
+
+# Start using ecosystem config (automatically loads .env)
+pm2 start ecosystem.config.js
+
+# Save PM2 configuration
+pm2 save
+
+# Setup PM2 to start on server reboot
+pm2 startup
+# Follow the instructions it provides
+```
+
+**Option 2: Direct start (server.js now loads .env automatically)**
+```bash
+# Stop old instance if exists
+pm2 delete shopify-pos-sync 2>/dev/null || true
+
 # Start the application
 pm2 start server.js --name shopify-pos-sync
 

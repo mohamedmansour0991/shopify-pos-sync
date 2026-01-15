@@ -3,9 +3,40 @@ import { createRequestHandler } from "@remix-run/node";
 import * as build from "./build/server/index.js";
 import { installGlobals } from "@remix-run/node";
 import http from "http";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 // Install globals for Node.js (Request, Response, etc.)
 installGlobals();
+
+// Load .env file manually (PM2 doesn't load it automatically)
+try {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const envPath = join(__dirname, ".env");
+  
+  const envFile = readFileSync(envPath, "utf-8");
+  const envLines = envFile.split("\n");
+  
+  for (const line of envLines) {
+    const trimmedLine = line.trim();
+    if (trimmedLine && !trimmedLine.startsWith("#")) {
+      const [key, ...valueParts] = trimmedLine.split("=");
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join("=").trim().replace(/^["']|["']$/g, "");
+        if (!process.env[key.trim()]) {
+          process.env[key.trim()] = value;
+        }
+      }
+    }
+  }
+  
+  console.log("✅ Loaded environment variables from .env file");
+} catch (error) {
+  // .env file not found or couldn't be read - that's okay if vars are set in environment
+  console.log("ℹ️  .env file not found, using environment variables");
+}
 
 // Get port from environment (cPanel sets this automatically)
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
