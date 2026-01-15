@@ -57,9 +57,18 @@ const server = http.createServer(async (req, res) => {
     const url = `${protocol}://${hostname}${req.url || "/"}`;
     
     // Create a Request object
+    const requestHeaders = new Headers(req.headers);
+
+    // For GET/HEAD requests, remove Content-Type and Content-Length headers
+    // This prevents Shopify login() from attempting to parse FormData
+    if (req.method === "GET" || req.method === "HEAD") {
+      requestHeaders.delete("content-type");
+      requestHeaders.delete("content-length");
+    }
+
     const requestInit = {
       method: req.method,
-      headers: new Headers(req.headers),
+      headers: requestHeaders,
     };
 
     // Add body ONLY for POST/PUT/PATCH/DELETE requests
