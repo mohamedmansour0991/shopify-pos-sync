@@ -1,6 +1,9 @@
 # Enable Rewrite Engine
 RewriteEngine On
 
+# Set DirectoryIndex
+DirectoryIndex index.php index.html
+
 # Serve static files directly (from build/client) - FIRST PRIORITY
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^(.*)$ - [L]
@@ -10,10 +13,13 @@ RewriteRule ^(.*)$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/build/
-RewriteCond %{REQUEST_URI} !^/index.php
-RewriteCond %{REQUEST_URI} !^/test-proxy.php
-RewriteCond %{REQUEST_URI} !^/test-index.php
-RewriteCond %{REQUEST_URI} !^/debug.php
+RewriteCond %{REQUEST_URI} !^/index\.php$
+RewriteCond %{REQUEST_URI} !^/test-proxy\.php$
+RewriteCond %{REQUEST_URI} !^/test-index\.php$
+RewriteCond %{REQUEST_URI} !^/test-htaccess\.php$
+RewriteCond %{REQUEST_URI} !^/test-simple\.php$
+RewriteCond %{REQUEST_URI} !^/test-proxy-direct\.php$
+RewriteCond %{REQUEST_URI} !^/debug\.php$
 RewriteRule ^(.*)$ index.php [L,QSA]
 
 # Security Headers
