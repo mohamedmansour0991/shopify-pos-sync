@@ -21,7 +21,7 @@ git push
 
 ### 2. على السيرفر - Pull التغييرات
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 git pull
 ```
 
@@ -48,7 +48,7 @@ pm2 start server.js --name shopify-pos-sync
 ### 6. التحقق
 ```bash
 # اختبار Route
-curl -I https://shopify-pos.tek-part.com/auth/login
+curl -I https://theonesystemco.tek-part.com/auth/login
 
 # يجب أن يعيد HTTP 200 أو 302 (ليس 404)
 

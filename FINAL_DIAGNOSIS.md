@@ -5,7 +5,7 @@
 1. ✅ `test-proxy-direct.php` يعمل ويعيد HTTP 200
 2. ✅ Node.js يعمل على البورت 3000
 3. ✅ PM2 يعمل بشكل صحيح
-4. ❌ `https://shopify-pos.tek-part.com/` يعطي 500 error
+4. ❌ `https://theonesystemco.tek-part.com/` يعطي 500 error
 
 ## التشخيص
 
@@ -20,7 +20,7 @@
 
 ```bash
 # افتح في المتصفح
-https://shopify-pos.tek-part.com/test-htaccess.php
+https://theonesystemco.tek-part.com/test-htaccess.php
 ```
 
 - إذا رأيت محتوى الملف: `.htaccess` لا يعمل
@@ -42,7 +42,7 @@ tail -100 /home/sortat/logs/error_log 2>/dev/null | grep -i "shopify-pos\|index.
 
 ```bash
 # من SSH
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 php index.php
 ```
 
@@ -75,7 +75,7 @@ if (function_exists('apache_get_modules')) {
 EOF
 
 # ثم افتح في المتصفح
-https://shopify-pos.tek-part.com/test-rewrite.php
+https://theonesystemco.tek-part.com/test-rewrite.php
 ```
 
 ## الحلول المحتملة

@@ -1,7 +1,7 @@
 # إصلاح خطأ 500 Internal Server Error
 
 ## المشكلة
-الصفحة الرئيسية `https://shopify-pos.tek-part.com/` تعطي 500 error، بينما:
+الصفحة الرئيسية `https://theonesystemco.tek-part.com/` تعطي 500 error، بينما:
 - ✅ `test-index.php` يعمل بشكل صحيح
 - ✅ Node.js يعمل على البورت 3000
 - ✅ PM2 يعمل بشكل صحيح
@@ -15,7 +15,7 @@
 ### 2. رفع الملفات المحدثة
 
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 git pull
 # أو انسخ index.php يدوياً
 ```
@@ -24,7 +24,7 @@ git pull
 
 ```bash
 # اختبار من SSH
-curl -v https://shopify-pos.tek-part.com/ 2>&1 | head -50
+curl -v https://theonesystemco.tek-part.com/ 2>&1 | head -50
 ```
 
 ### 4. إذا استمرت المشكلة
@@ -48,7 +48,7 @@ tail -50 /var/log/httpd/error_log 2>/dev/null
 #### ب) اختبار PHP مباشرة
 
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 php -r "echo 'PHP Version: ' . phpversion() . PHP_EOL;"
 php -r "var_dump(function_exists('curl_init'));"
 php -r "var_dump(function_exists('getallheaders'));"
@@ -65,7 +65,7 @@ require 'index.php';
 EOF
 
 # ثم من المتصفح
-https://shopify-pos.tek-part.com/test-direct.php
+https://theonesystemco.tek-part.com/test-direct.php
 ```
 
 #### د) التحقق من .htaccess
@@ -75,7 +75,7 @@ https://shopify-pos.tek-part.com/test-direct.php
 mv .htaccess .htaccess.bak
 
 # ثم جرب
-curl -I https://shopify-pos.tek-part.com/
+curl -I https://theonesystemco.tek-part.com/
 
 # إذا عمل، المشكلة في .htaccess
 # إذا لم يعمل، المشكلة في index.php

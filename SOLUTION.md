@@ -4,7 +4,7 @@
 
 1. ✅ `test-proxy-direct.php` يعمل بشكل صحيح
 2. ✅ Node.js يعمل على البورت 3000 ويعيد `{}`
-3. ❌ `https://shopify-pos.tek-part.com/` يعطي 500 error
+3. ❌ `https://theonesystemco.tek-part.com/` يعطي 500 error
 4. ❌ PM2 logs تظهر `Could not parse content as FormData` (أحياناً)
 
 ## السبب
@@ -23,7 +23,7 @@
 ### 1. رفع الملفات المحدثة
 
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 git pull
 # أو انسخ index.php يدوياً
 ```
@@ -31,7 +31,7 @@ git pull
 ### 2. اختبار الموقع
 
 ```bash
-curl -I https://shopify-pos.tek-part.com/
+curl -I https://theonesystemco.tek-part.com/
 ```
 
 يجب أن يعيد HTTP 200 أو 302 بدلاً من 500.

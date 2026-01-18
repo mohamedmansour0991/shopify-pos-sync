@@ -7,7 +7,7 @@
 
 ### 1. التحقق من موقع قاعدة البيانات
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 
 # تحقق من وجود قاعدة البيانات
 ls -la dev.db

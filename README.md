@@ -74,7 +74,7 @@ A Shopify app that synchronizes products and categories from your POS (Point of 
 3. Choose "Create app manually"
 4. Fill in the app details:
    - App name: POS Sync
-   - App URL: Your deployed app URL (e.g., `https://shopify-pos.tek-part.com`)
+   - App URL: Your deployed app URL (e.g., `https://theonesystemco.tek-part.com`)
    - Allowed redirection URLs: `{your-url}/auth/callback`, `{your-url}/auth/shopify/callback`
 
 5. Copy the API key and secret to your `.env` file
@@ -174,7 +174,7 @@ Responses can be:
 **Required variables** (validated on startup):
 - `SHOPIFY_API_KEY` - Your Shopify app API key
 - `SHOPIFY_API_SECRET` - Your Shopify app API secret
-- `HOST` - Your app's public URL (e.g., `https://shopify-pos.tek-part.com`)
+- `HOST` - Your app's public URL (e.g., `https://theonesystemco.tek-part.com`)
 - `SCOPES` - Comma-separated list of Shopify API scopes
 - `DATABASE_URL` - Database connection string
 

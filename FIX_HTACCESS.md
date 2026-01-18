@@ -16,7 +16,7 @@
 ### 1. رفع الملفات المحدثة
 
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 git pull
 # أو انسخ .htaccess يدوياً
 ```
@@ -24,7 +24,7 @@ git pull
 ### 2. اختبار الموقع
 
 ```bash
-curl -I https://shopify-pos.tek-part.com/
+curl -I https://theonesystemco.tek-part.com/
 ```
 
 يجب أن يعيد HTTP 200 أو 302 بدلاً من 500.
@@ -33,7 +33,7 @@ curl -I https://shopify-pos.tek-part.com/
 
 ```bash
 # افتح في المتصفح
-https://shopify-pos.tek-part.com/test-htaccess.php
+https://theonesystemco.tek-part.com/test-htaccess.php
 ```
 
 - إذا رأيت محتوى الملف: `.htaccess` لا يزال لا يعمل
@@ -59,7 +59,7 @@ if (function_exists('apache_get_modules')) {
 EOF
 
 # ثم افتح في المتصفح
-https://shopify-pos.tek-part.com/test-rewrite.php
+https://theonesystemco.tek-part.com/test-rewrite.php
 ```
 
 #### ب) التحقق من Apache Error Logs

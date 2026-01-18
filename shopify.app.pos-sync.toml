@@ -9,7 +9,7 @@
 
 client_id = "2e0d4096fb1c73f0851cb3bfb9e92210"
 name = "POS Sync"
-application_url = "https://shopify-pos.tek-part.com"
+application_url = "https://theonesystemco.tek-part.com"
 embedded = true
 
 [build]
@@ -19,12 +19,23 @@ dev_store_url = "tarawud1.myshopify.com"
 [webhooks]
 api_version = "2026-01"
 
+# App webhooks
+[[webhooks.subscriptions]]
+topics = ["app/uninstalled"]
+uri = "/webhooks"
+
+# Mandatory compliance webhooks - required by Shopify App Store
+# These must use compliance_topics array format as per Shopify documentation
+[[webhooks.subscriptions]]
+compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+uri = "/webhooks"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_inventory,read_product_listings,read_products,write_inventory,write_product_listings,write_products"
 
 [auth]
 redirect_urls = [
-  "https://shopify-pos.tek-part.com/auth/callback",
-  "https://shopify-pos.tek-part.com/auth/shopify/callback"
+  "https://theonesystemco.tek-part.com/auth/callback",
+  "https://theonesystemco.tek-part.com/auth/shopify/callback"
 ]

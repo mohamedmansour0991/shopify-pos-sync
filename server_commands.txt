@@ -1,0 +1,32 @@
+========================================
+   Commands to Run After SSH Connection
+========================================
+
+# 1. Go to app directory
+cd ~/public_html/theonesystemco.tek-part.com
+
+# 2. Check current HOST
+cat .env | grep HOST
+
+# 3. Update HOST to new domain
+sed -i 's|HOST=.*|HOST=https://theonesystemco.tek-part.com|' .env
+
+# 4. Verify update
+cat .env | grep HOST
+
+# 5. Restart PM2
+pm2 restart server
+
+# 6. Check logs
+pm2 logs server --lines 10
+
+# 7. Test app
+curl -I https://theonesystemco.tek-part.com
+curl -I https://theonesystemco.tek-part.com/auth/login
+
+========================================
+   Copy-Paste All Commands at Once:
+========================================
+
+cd ~/public_html/theonesystemco.tek-part.com && cat .env | grep HOST && sed -i 's|HOST=.*|HOST=https://theonesystemco.tek-part.com|' .env && cat .env | grep HOST && pm2 restart server && pm2 logs server --lines 10
+

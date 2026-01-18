@@ -37,7 +37,7 @@ cp index.php index-debug.php
 
 ```bash
 # افتح في المتصفح
-https://shopify-pos.tek-part.com/index.php
+https://theonesystemco.tek-part.com/index.php
 ```
 
 إذا عمل، المشكلة في `DirectoryIndex`. إذا لم يعمل، المشكلة في `index.php` نفسه.
@@ -53,7 +53,7 @@ DirectoryIndex index.php
 EOF
 
 # ثم اختبر
-curl -I https://shopify-pos.tek-part.com/
+curl -I https://theonesystemco.tek-part.com/
 ```
 
 ### الخطوة 5: إذا استمرت المشكلة

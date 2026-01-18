@@ -19,11 +19,11 @@
 3. اذهب إلى **App setup**
 
 #### تحديث:
-- **App URL**: `https://shopify-pos.tek-part.com`
+- **App URL**: `https://theonesystemco.tek-part.com`
 - **Allowed redirection URLs**:
   ```
-  https://shopify-pos.tek-part.com/auth/callback
-  https://shopify-pos.tek-part.com/auth/shopify/callback
+  https://theonesystemco.tek-part.com/auth/callback
+  https://theonesystemco.tek-part.com/auth/shopify/callback
   ```
 
 4. **احفظ التغييرات**
@@ -31,13 +31,13 @@
 ### 2. التحقق من HOST في .env
 
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 cat .env | grep HOST
 ```
 
 يجب أن يكون:
 ```
-HOST=https://shopify-pos.tek-part.com
+HOST=https://theonesystemco.tek-part.com
 ```
 
 **مهم**: 
@@ -55,7 +55,7 @@ pm2 logs shopify-pos-sync --lines 5
 
 ```bash
 # اختبار من السيرفر
-curl -I https://shopify-pos.tek-part.com
+curl -I https://theonesystemco.tek-part.com
 
 # يجب أن يعيد HTTP 200 أو 302
 ```
@@ -81,7 +81,7 @@ curl -I https://shopify-pos.tek-part.com
 ### الحل 3: اختبار PHP Proxy
 ```bash
 # افتح في المتصفح
-https://shopify-pos.tek-part.com/debug.php
+https://theonesystemco.tek-part.com/debug.php
 
 # يجب أن ترى معلومات الاتصال
 ```
@@ -93,7 +93,7 @@ pm2 logs shopify-pos-sync --lines 50 | grep -i error
 
 ## 📝 ملاحظات مهمة
 
-1. **HOST في .env**: يجب أن يكون `https://shopify-pos.tek-part.com` (مع https)
+1. **HOST في .env**: يجب أن يكون `https://theonesystemco.tek-part.com` (مع https)
 2. **Shopify Partners Dashboard**: يجب تحديث App URL و Redirect URLs
 3. **SSL Certificate**: يجب أن يكون مفعل
 4. **PM2**: يجب أن يكون يعمل بشكل مستمر

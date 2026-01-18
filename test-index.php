@@ -16,8 +16,8 @@ curl_setopt($ch, CURLOPT_HEADER, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'X-Forwarded-Proto: https',
-    'X-Forwarded-Host: shopify-pos.tek-part.com',
-    'Host: shopify-pos.tek-part.com'
+    'X-Forwarded-Host: theonesystemco.tek-part.com',
+    'Host: theonesystemco.tek-part.com'
 ]);
 
 $response = curl_exec($ch);

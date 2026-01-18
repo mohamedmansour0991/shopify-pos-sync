@@ -5,7 +5,7 @@
 ### 1. الاتصال عبر SSH
 ```bash
 ssh your-username@your-server
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 ```
 
 ### 2. سحب آخر التحديثات
@@ -38,7 +38,7 @@ nano .env
 NODE_ENV=production
 SHOPIFY_API_KEY=your_api_key
 SHOPIFY_API_SECRET=your_api_secret
-HOST=https://shopify-pos.tek-part.com
+HOST=https://theonesystemco.tek-part.com
 SCOPES=read_products,write_products,read_product_listings,write_product_listings,read_inventory,write_inventory
 DATABASE_URL=file:./prisma/dev.db
 PORT=3000
@@ -163,9 +163,9 @@ pm2 logs shopify-pos-sync --lines 100
 
 ### 3. التحقق من الصلاحيات
 ```bash
-chmod 755 ~/public_html/shopify-pos.tek-part.com
-chmod +x ~/public_html/shopify-pos.tek-part.com/server.js
-chmod 666 ~/public_html/shopify-pos.tek-part.com/prisma/dev.db
+chmod 755 ~/public_html/theonesystemco.tek-part.com
+chmod +x ~/public_html/theonesystemco.tek-part.com/server.js
+chmod 666 ~/public_html/theonesystemco.tek-part.com/prisma/dev.db
 ```
 
 ### 4. التحقق من البورت

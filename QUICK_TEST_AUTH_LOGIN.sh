@@ -11,12 +11,12 @@ echo ""
 
 # 2. اختبار من public domain
 echo "2. Testing from public domain:"
-curl -I https://shopify-pos.tek-part.com/auth/login 2>&1 | head -10
+curl -I https://theonesystemco.tek-part.com/auth/login 2>&1 | head -10
 echo ""
 
 # 3. اختبار من index.php proxy
 echo "3. Testing from index.php proxy:"
-curl -I https://shopify-pos.tek-part.com/index.php/auth/login 2>&1 | head -10
+curl -I https://theonesystemco.tek-part.com/index.php/auth/login 2>&1 | head -10
 echo ""
 
 # 4. التحقق من PM2 logs

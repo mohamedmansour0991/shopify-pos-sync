@@ -38,7 +38,7 @@ if (function_exists('apache_get_modules')) {
 EOF
 
 # ثم افتح في المتصفح
-https://shopify-pos.tek-part.com/test-rewrite.php
+https://theonesystemco.tek-part.com/test-rewrite.php
 ```
 
 ### 2. التحقق من Apache Error Logs
@@ -81,7 +81,7 @@ if ($htaccess) {
 EOF
 
 # ثم افتح في المتصفح
-https://shopify-pos.tek-part.com/test-htaccess-syntax.php
+https://theonesystemco.tek-part.com/test-htaccess-syntax.php
 ```
 
 ### 5. إذا كان mod_rewrite غير مفعل

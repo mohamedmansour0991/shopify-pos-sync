@@ -5,7 +5,7 @@
 ### 1. Connect via SSH
 ```bash
 ssh your-username@your-server
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 ```
 
 ### 2. Pull Latest Code
@@ -40,7 +40,7 @@ Add the following:
 NODE_ENV=production
 SHOPIFY_API_KEY=your_api_key
 SHOPIFY_API_SECRET=your_api_secret
-HOST=https://shopify-pos.tek-part.com
+HOST=https://theonesystemco.tek-part.com
 SCOPES=read_products,write_products,read_product_listings,write_product_listings,read_inventory,write_inventory
 DATABASE_URL=file:./prisma/dev.db
 PORT=3000
@@ -107,11 +107,11 @@ If your server uses Apache with mod_proxy, update `.htaccess`:
 
 Make sure these directories are writable:
 ```bash
-chmod 755 ~/public_html/shopify-pos.tek-part.com
-chmod 755 ~/public_html/shopify-pos.tek-part.com/build
-chmod 755 ~/public_html/shopify-pos.tek-part.com/prisma
-chmod +x ~/public_html/shopify-pos.tek-part.com/server.js
-chmod 666 ~/public_html/shopify-pos.tek-part.com/prisma/dev.db
+chmod 755 ~/public_html/theonesystemco.tek-part.com
+chmod 755 ~/public_html/theonesystemco.tek-part.com/build
+chmod 755 ~/public_html/theonesystemco.tek-part.com/prisma
+chmod +x ~/public_html/theonesystemco.tek-part.com/server.js
+chmod 666 ~/public_html/theonesystemco.tek-part.com/prisma/dev.db
 ```
 
 ### 12. Check PM2 Status
@@ -170,9 +170,9 @@ pm2 logs shopify-pos-sync --lines 100
 ### Check 2: File Permissions
 ```bash
 # Set correct permissions
-find ~/public_html/shopify-pos.tek-part.com -type d -exec chmod 755 {} \;
-find ~/public_html/shopify-pos.tek-part.com -type f -exec chmod 644 {} \;
-chmod +x ~/public_html/shopify-pos.tek-part.com/server.js
+find ~/public_html/theonesystemco.tek-part.com -type d -exec chmod 755 {} \;
+find ~/public_html/theonesystemco.tek-part.com -type f -exec chmod 644 {} \;
+chmod +x ~/public_html/theonesystemco.tek-part.com/server.js
 ```
 
 ### Check 3: Environment Variables
@@ -206,7 +206,7 @@ The `.htaccess` should proxy requests to your Node.js app on the correct port.
 ### Check 5: Build Output
 Ensure the build completed successfully:
 ```bash
-ls -la ~/public_html/shopify-pos.tek-part.com/build/server/
+ls -la ~/public_html/theonesystemco.tek-part.com/build/server/
 ```
 
 Should see `index.js` file.
@@ -216,7 +216,7 @@ Should see `index.js` file.
 If you have SSH access and PM2 installed:
 
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 pm2 start server.js --name shopify-pos-sync
 pm2 save
 pm2 startup
@@ -248,7 +248,7 @@ pm2 logs shopify-pos-sync --lines 0
 tail -f ~/logs/error_log
 
 # Or check cPanel error logs
-tail -f ~/public_html/shopify-pos.tek-part.com/error_log
+tail -f ~/public_html/theonesystemco.tek-part.com/error_log
 ```
 
 ## Common Issues

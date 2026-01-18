@@ -10,7 +10,7 @@
 ### 1. رفع الملفات المحدثة
 
 ```bash
-cd ~/public_html/shopify-pos.tek-part.com
+cd ~/public_html/theonesystemco.tek-part.com
 git pull
 # أو انسخ index.php يدوياً
 ```
@@ -18,7 +18,7 @@ git pull
 ### 2. اختبار الموقع
 
 ```bash
-curl -I https://shopify-pos.tek-part.com/
+curl -I https://theonesystemco.tek-part.com/
 ```
 
 يجب أن يعيد HTTP 200 أو 302 بدلاً من 500.
@@ -29,7 +29,7 @@ curl -I https://shopify-pos.tek-part.com/
 
 ```bash
 # افتح في المتصفح
-https://shopify-pos.tek-part.com/test-simple.php
+https://theonesystemco.tek-part.com/test-simple.php
 ```
 
 يجب أن ترى معلومات PHP.
